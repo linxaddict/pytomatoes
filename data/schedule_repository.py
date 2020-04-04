@@ -1,7 +1,7 @@
 from requests import HTTPError, Timeout, ConnectionError
 
-from firebase_backend import FirebaseBackend
-from model import Schedule
+from data.firebase_backend import FirebaseBackend
+from data.model import Schedule
 
 
 class ScheduleRepository:

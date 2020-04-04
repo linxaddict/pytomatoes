@@ -5,7 +5,7 @@ from typing import Dict
 from pyrebase import pyrebase
 from pyrebase.pyrebase import Firebase
 
-from model import Schedule, PlanItem
+from data.model import Schedule, PlanItem
 
 
 @dataclass
