@@ -2,8 +2,10 @@ import asyncio
 import os
 from datetime import datetime, date
 
+from firebase_backend import FirebaseBackend, FirebaseConfig
+from model import PlanItem
 from pump import Pump
-from schedule_repository import ScheduleRepository, PlanItem, FirebaseConfig
+from schedule_repository import ScheduleRepository
 
 INTERVAL = 5
 
@@ -42,7 +44,8 @@ async def main():
         'password': os.getenv('PASSWORD')
     }
 
-    repository = ScheduleRepository(FirebaseConfig(**config))
+    firebase_backend = FirebaseBackend(FirebaseConfig(**config))
+    repository = ScheduleRepository(firebase_backend)
     pump = Pump(gpio_pin=21)
 
     while True:
