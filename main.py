@@ -10,6 +10,7 @@ from data.firebase_backend import FirebaseBackend, FirebaseConfig
 from data.model import PlanItem, PumpActivation
 from data.pump_activation_repository import PumpActivationRepository
 from data.schedule_repository import ScheduleRepository
+from log.logger import logger
 from pump.pump import Pump
 
 INTERVAL = 5
@@ -54,7 +55,7 @@ async def main():
     schedule_dao = ScheduleDao(session=session)
     pump_activation_dao = PumpActivationDao(session=session)
 
-    schedule_repository = ScheduleRepository(firebase_backend, plan_item_dao, schedule_dao)
+    schedule_repository = ScheduleRepository(firebase_backend, plan_item_dao, schedule_dao, logger)
     pump_activation_repository = PumpActivationRepository(pump_activation_dao)
 
     pump = Pump(gpio_pin=21)
@@ -67,12 +68,14 @@ async def main():
                     if await should_start_pump(item, pump_activation_repository):
                         slot_ts = extract_slot_ts(item)
 
+                        logger.info('activating the pump, ts: {0}, water: {1} ml'.format(slot_ts, item.water))
+
                         await asyncio.gather(
                             pump_activation_repository.store(PumpActivation(timestamp=slot_ts, water=item.water)),
                             pump.on(item.water)
                         )
             except Exception as e:
-                print('an exception occurred: ', e)
+                logger.error('an exception occurred: {0}'.format(e))
 
         await asyncio.gather(
             asyncio.sleep(INTERVAL),
