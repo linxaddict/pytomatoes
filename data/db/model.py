@@ -25,3 +25,11 @@ class PlanItemEntity(Base):
 
     def __repr__(self):
         return "<PlanItem(id='{0}', time='{1}', water='{2}')>".format(self.id, self.time, self.water)
+
+
+class PumpActivationEntity(Base):
+    __tablename__ = 'pump_activations'
+
+    id = Column(Integer, primary_key=True)
+    timestamp = Column(String)
+    water = Column(Integer)

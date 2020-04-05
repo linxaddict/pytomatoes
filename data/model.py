@@ -11,3 +11,9 @@ class PlanItem:
 @dataclass
 class Schedule:
     plan: List[PlanItem]
+
+
+@dataclass
+class PumpActivation:
+    timestamp: str
+    water: int

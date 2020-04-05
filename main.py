@@ -4,15 +4,15 @@ from datetime import datetime, date
 
 from data.db.db_common import Session
 from data.db.plan_item_dao import PlanItemDao
+from data.db.pump_activation_dao import PumpActivationDao
 from data.db.schedule_dao import ScheduleDao
 from data.firebase_backend import FirebaseBackend, FirebaseConfig
-from data.model import PlanItem
-from pump.pump import Pump
+from data.model import PlanItem, PumpActivation
+from data.pump_activation_repository import PumpActivationRepository
 from data.schedule_repository import ScheduleRepository
+from pump.pump import Pump
 
 INTERVAL = 5
-
-processed_time_slots = set()
 
 
 def extract_slot_ts(item: PlanItem) -> str:
@@ -22,7 +22,7 @@ def extract_slot_ts(item: PlanItem) -> str:
     return slot.strftime('%Y-%m-%dT%H:%M')
 
 
-def should_start_pump(item: PlanItem) -> bool:
+async def should_start_pump(item: PlanItem, activation_repository: PumpActivationRepository) -> bool:
     time = datetime.strptime(item.time, '%H:%M').time()
     now = datetime.now().time()
 
@@ -31,7 +31,7 @@ def should_start_pump(item: PlanItem) -> bool:
     slot_str = slot.strftime('%Y-%m-%dT%H:%M')
     delta = datetime.combine(date.today(), now) - slot
 
-    return now > time and delta.seconds >= INTERVAL and slot_str not in processed_time_slots
+    return now > time and delta.seconds >= INTERVAL and not await activation_repository.exists(slot_str)
 
 
 async def main():
@@ -49,22 +49,32 @@ async def main():
 
     firebase_backend = FirebaseBackend(FirebaseConfig(**config))
     session = Session()
+
     plan_item_dao = PlanItemDao(session=session)
     schedule_dao = ScheduleDao(session=session)
-    repository = ScheduleRepository(firebase_backend, plan_item_dao, schedule_dao)
+    pump_activation_dao = PumpActivationDao(session=session)
+
+    schedule_repository = ScheduleRepository(firebase_backend, plan_item_dao, schedule_dao)
+    pump_activation_repository = PumpActivationRepository(pump_activation_dao)
+
     pump = Pump(gpio_pin=21)
 
     while True:
-        schedule = await repository.fetch()
+        schedule = await schedule_repository.fetch()
         if schedule:
             try:
                 for item in schedule.plan:
                     print('item: ', item)
 
-                    if should_start_pump(item):
+                    if await should_start_pump(item, pump_activation_repository):
                         slot_ts = extract_slot_ts(item)
-                        processed_time_slots.add(slot_ts)
-                        await pump.on(item.water)
+
+                        await asyncio.gather(
+                            pump_activation_repository.store(PumpActivation(timestamp=slot_ts, water=item.water)),
+                            pump.on(item.water)
+                        )
+                    else:
+                        print('slot_ts in db: ', extract_slot_ts(item))
             except Exception as e:
                 print('an exception occurred: ', e)
 
