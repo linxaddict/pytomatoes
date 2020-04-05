@@ -78,3 +78,11 @@ class FirebaseBackend:
         }
 
         self.db.update(data)
+
+    async def send_health_check(self, timestamp: str) -> None:
+        await self._authenticate_if_needed()
+        data = {
+            "health_check": timestamp
+        }
+
+        self.db.update(data)

@@ -64,8 +64,6 @@ async def main():
         if schedule:
             try:
                 for item in schedule.plan:
-                    print('item: ', item)
-
                     if await should_start_pump(item, pump_activation_repository):
                         slot_ts = extract_slot_ts(item)
 
@@ -73,12 +71,13 @@ async def main():
                             pump_activation_repository.store(PumpActivation(timestamp=slot_ts, water=item.water)),
                             pump.on(item.water)
                         )
-                    else:
-                        print('slot_ts in db: ', extract_slot_ts(item))
             except Exception as e:
                 print('an exception occurred: ', e)
 
-        await asyncio.sleep(INTERVAL)
+        await asyncio.gather(
+            asyncio.sleep(INTERVAL),
+            firebase_backend.send_health_check(datetime.now().strftime('%Y-%m-%dT%H:%M:%S'))
+        )
 
 
 if __name__ == "__main__":
