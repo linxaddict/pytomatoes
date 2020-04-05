@@ -2,6 +2,9 @@ import asyncio
 import os
 from datetime import datetime, date
 
+from data.db.db_common import Session
+from data.db.plan_item_dao import PlanItemDao
+from data.db.schedule_dao import ScheduleDao
 from data.firebase_backend import FirebaseBackend, FirebaseConfig
 from data.model import PlanItem
 from pump.pump import Pump
@@ -45,22 +48,25 @@ async def main():
     }
 
     firebase_backend = FirebaseBackend(FirebaseConfig(**config))
-    repository = ScheduleRepository(firebase_backend)
+    session = Session()
+    plan_item_dao = PlanItemDao(session=session)
+    schedule_dao = ScheduleDao(session=session)
+    repository = ScheduleRepository(firebase_backend, plan_item_dao, schedule_dao)
     pump = Pump(gpio_pin=21)
 
     while True:
         schedule = await repository.fetch()
+        if schedule:
+            try:
+                for item in schedule.plan:
+                    print('item: ', item)
 
-        try:
-            for item in schedule.plan:
-                print('item: ', item)
-
-                if should_start_pump(item):
-                    slot_ts = extract_slot_ts(item)
-                    processed_time_slots.add(slot_ts)
-                    await pump.on(item.water)
-        except Exception as e:
-            print('could not parse data: ', e)
+                    if should_start_pump(item):
+                        slot_ts = extract_slot_ts(item)
+                        processed_time_slots.add(slot_ts)
+                        await pump.on(item.water)
+            except Exception as e:
+                print('an exception occurred: ', e)
 
         await asyncio.sleep(INTERVAL)
 
