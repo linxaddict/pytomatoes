@@ -11,6 +11,7 @@ class PlanItem:
 @dataclass
 class Schedule:
     plan: List[PlanItem]
+    active: bool
 
 
 @dataclass

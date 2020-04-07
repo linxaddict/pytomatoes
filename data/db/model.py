@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey
 from sqlalchemy.orm import relationship
 from data.db.db_common import Base
 
@@ -7,6 +7,7 @@ class ScheduleEntity(Base):
     __tablename__ = 'schedules'
 
     id = Column(Integer, primary_key=True)
+    active = Column(Boolean)
     plan_items = relationship('PlanItemEntity', back_populates='schedule')
 
     def __repr__(self):

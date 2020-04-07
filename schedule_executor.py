@@ -49,7 +49,8 @@ class ScheduleExecutor:
 
         while True:
             schedule = await self._schedule_repository.fetch()
-            if schedule:
+
+            if schedule and schedule.active:
                 try:
                     for item in schedule.plan:
                         if await self.should_start_pump(item, self._pump_activation_repository, margin_in_minutes):

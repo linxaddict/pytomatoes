@@ -67,7 +67,7 @@ class FirebaseBackend:
         plan = self.db.child('plan').get().val()
         return Schedule([
             PlanItem(time=item['time'], water=int(item['water'])) for item in plan
-        ])
+        ], active=bool(self.db.child('active').get().val()))
 
     async def update_schedule(self, schedule: Schedule) -> None:
         await self._authenticate_if_needed()

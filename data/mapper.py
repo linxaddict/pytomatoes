@@ -7,7 +7,7 @@ def map_plan_item_to_entity(plan_item: PlanItem) -> PlanItemEntity:
 
 
 def map_schedule_to_entity(schedule: Schedule) -> ScheduleEntity:
-    return ScheduleEntity(plan_items=[map_plan_item_to_entity(item) for item in schedule.plan])
+    return ScheduleEntity(plan_items=[map_plan_item_to_entity(item) for item in schedule.plan], active=schedule.active)
 
 
 def map_pump_activation_to_entity(pump_activation: PumpActivation) -> PumpActivationEntity:
@@ -19,7 +19,7 @@ def map_plan_item_entity_to_domain(plan_item: PlanItemEntity) -> PlanItem:
 
 
 def map_schedule_entity_to_domain(schedule: ScheduleEntity) -> Schedule:
-    return Schedule(plan=[map_plan_item_entity_to_domain(item) for item in schedule.plan_items])
+    return Schedule(plan=[map_plan_item_entity_to_domain(item) for item in schedule.plan_items], active=schedule.active)
 
 
 def map_pump_activation_entity_to_domain(pump_activation: PumpActivationEntity) -> PumpActivation:
