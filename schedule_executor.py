@@ -31,7 +31,8 @@ class ScheduleExecutor:
         return slot.strftime('%Y-%m-%dT%H:%M')
 
     @staticmethod
-    async def should_start_pump(item: PlanItem, activation_repository: PumpActivationRepository) -> bool:
+    async def should_start_pump(item: PlanItem, activation_repository: PumpActivationRepository,
+                                margin_in_minutes=60) -> bool:
         time = datetime.strptime(item.time, '%H:%M').time()
         now = datetime.now().time()
 
@@ -40,10 +41,10 @@ class ScheduleExecutor:
         slot_str = slot.strftime('%Y-%m-%dT%H:%M')
         delta = datetime.combine(date.today(), now) - slot
 
-        return now > time and delta.seconds >= ScheduleExecutor.INTERVAL and not await activation_repository.exists(
+        return now > time and delta.seconds < margin_in_minutes * 60 and not await activation_repository.exists(
             slot_str)
 
-    async def execute(self) -> None:
+    async def execute(self, margin_in_minutes=60) -> None:
         loop = asyncio.get_event_loop()
 
         while True:
@@ -51,7 +52,7 @@ class ScheduleExecutor:
             if schedule:
                 try:
                     for item in schedule.plan:
-                        if await self.should_start_pump(item, self._pump_activation_repository):
+                        if await self.should_start_pump(item, self._pump_activation_repository, margin_in_minutes):
                             slot_ts = self.extract_slot_ts(item)
 
                             self._logger.info('activating the pump, ts: {0}, water: {1} ml'.format(slot_ts, item.water))
