@@ -4,6 +4,10 @@ from data.db.db_common import Base
 
 
 class ScheduleEntity(Base):
+    """
+    Represents schedules in the database. It has a 1 - n relation with PlanItemEntity.
+    """
+
     __tablename__ = 'schedules'
 
     id = Column(Integer, primary_key=True)
@@ -15,6 +19,10 @@ class ScheduleEntity(Base):
 
 
 class PlanItemEntity(Base):
+    """
+    Represents schedule plan items in the database. Every item can be related to one schedule.
+    """
+
     __tablename__ = 'plan_items'
 
     id = Column(Integer, primary_key=True)
@@ -29,6 +37,10 @@ class PlanItemEntity(Base):
 
 
 class PumpActivationEntity(Base):
+    """
+    Represents history of pump activations.
+    """
+
     __tablename__ = 'pump_activations'
 
     id = Column(Integer, primary_key=True)
