@@ -14,7 +14,7 @@ class ScheduleEntity(Base):
     active = Column(Boolean)
     plan_items = relationship('PlanItemEntity', back_populates='schedule')
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "<Schedule(id='{0}')>".format(self.id)
 
 
@@ -32,7 +32,7 @@ class PlanItemEntity(Base):
     schedule_id = Column(Integer, ForeignKey('schedules.id'))
     schedule = relationship('ScheduleEntity', back_populates="plan_items")
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "<PlanItem(id='{0}', time='{1}', water='{2}')>".format(self.id, self.time, self.water)
 
 
@@ -46,3 +46,7 @@ class PumpActivationEntity(Base):
     id = Column(Integer, primary_key=True)
     timestamp = Column(String)
     water = Column(Integer)
+
+    def __repr__(self) -> str:
+        return "<PumpActivationEntity(id='{0}', timestamp='{1}', water='{2}')>".format(self.id, self.timestamp,
+                                                                                       self.water)
