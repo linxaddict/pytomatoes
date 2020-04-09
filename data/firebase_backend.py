@@ -21,10 +21,10 @@ class FirebaseConfig:
 
 def authenticate(func: Any):
     @functools.wraps(func)
-    async def wrapped(*args: List[Any]):
+    async def wrapped(*args: List[Any], **kwargs):
         # noinspection PyUnresolvedReferences
         await args[0].authenticate_if_needed()
-        return await func(*args)
+        return await func(*args, **kwargs)
 
     return wrapped
 
@@ -47,10 +47,10 @@ class FirebaseBackend:
     @staticmethod
     def _configure_firebase(firebase_config: FirebaseConfig) -> Firebase:
         config = {
-            "apiKey": firebase_config.apiKey,
-            "authDomain": firebase_config.authDomain,
-            "databaseURL": firebase_config.databaseURL,
-            "storageBucket": firebase_config.storageBucket
+            'apiKey': firebase_config.apiKey,
+            'authDomain': firebase_config.authDomain,
+            'databaseURL': firebase_config.databaseURL,
+            'storageBucket': firebase_config.storageBucket
         }
 
         return pyrebase.initialize_app(config)
@@ -85,9 +85,20 @@ class FirebaseBackend:
     @authenticate
     async def update_schedule(self, schedule: Schedule) -> None:
         data = {
-            "plan": [
-                {"time": p.time, "water": p.water} for p in schedule.plan
+            'plan': [
+                {'time': p.time, 'water': p.water} for p in schedule.plan
             ]
+        }
+
+        self.db.update(data)
+
+    @authenticate
+    async def send_execution_log(self, timestamp: str, water: int) -> None:
+        data = {
+            'last_activation': {
+                'timestamp': timestamp,
+                'water': water
+            }
         }
 
         self.db.update(data)
@@ -95,7 +106,7 @@ class FirebaseBackend:
     @authenticate
     async def send_health_check(self, timestamp: str) -> None:
         data = {
-            "health_check": timestamp
+            'health_check': timestamp
         }
 
         self.db.update(data)

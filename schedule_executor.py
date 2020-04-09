@@ -12,9 +12,8 @@ from pump.pump import Pump
 
 class ScheduleExecutor:
     INTERVAL = 5
-    DATE_TIME_FORMAT = '%Y-%m-%dT%H:%M'
+    DATE_TIME_FORMAT = '%Y-%m-%dT%H:%M:%S'
     TIME_FORMAT = '%H:%M'
-    HEALTH_CHECK_FORMAT = '%Y-%m-%dT%H:%M:%S'
 
     def __init__(self, firebase_backend: FirebaseBackend, schedule_repository: ScheduleRepository,
                  pump_activation_repository: PumpActivationRepository, pump: Pump, logger: Logger):
@@ -64,6 +63,9 @@ class ScheduleExecutor:
                             await asyncio.gather(
                                 self._pump_activation_repository.store(
                                     PumpActivation(timestamp=slot_ts, water=item.water)),
+                                self._firebase_backend.send_execution_log(
+                                    timestamp=datetime.now().strftime(ScheduleExecutor.DATE_TIME_FORMAT),
+                                    water=item.water),
                                 loop.run_in_executor(executor=self._background_executor,
                                                      func=lambda: self._pump.on(item.water))
                             )
@@ -76,5 +78,5 @@ class ScheduleExecutor:
         while True:
             await asyncio.gather(
                 asyncio.sleep(interval),
-                self._firebase_backend.send_health_check(datetime.now().strftime(ScheduleExecutor.HEALTH_CHECK_FORMAT))
+                self._firebase_backend.send_health_check(datetime.now().strftime(ScheduleExecutor.DATE_TIME_FORMAT))
             )
