@@ -10,6 +10,7 @@ class PlanItemDao:
     the table is cleared every time when a new list is stored because for now the app supports only one schedule that
     is constantly pulled and cached from Firebase.
     """
+
     def __init__(self, session: Session):
         self.session = session
 
