@@ -1,5 +1,4 @@
 import asyncio
-import os
 
 from data.db.db_common import Session
 from data.db.plan_item_dao import PlanItemDao
@@ -11,6 +10,7 @@ from data.schedule_repository import ScheduleRepository
 from log.logger import logger
 from pump.pump import Pump
 from schedule_executor import ScheduleExecutor
+from settings import Settings
 
 GPIO_PIN = 21
 
@@ -19,16 +19,10 @@ async def main():
     from dotenv import load_dotenv
     load_dotenv()
 
-    config = {
-        'apiKey': os.getenv('API_KEY'),
-        'authDomain': os.getenv('AUTH_DOMAIN'),
-        'databaseURL': os.getenv('DATABASE_URL'),
-        'storageBucket': os.getenv('STORAGE_BUCKET'),
-        'email': os.getenv('EMAIL'),
-        'password': os.getenv('PASSWORD')
-    }
+    settings = Settings()
+    firebase_config = settings.firebase_aggregated_config
 
-    firebase_backend = FirebaseBackend(FirebaseConfig(**config))
+    firebase_backend = FirebaseBackend(FirebaseConfig(**firebase_config))
     session = Session()
 
     plan_item_dao = PlanItemDao(session=session)

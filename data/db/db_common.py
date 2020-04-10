@@ -1,7 +1,11 @@
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
 
-engine = create_engine('sqlite:///db.sqlite3')
+from settings import Settings
+
+settings = Settings()
+
+engine = create_engine('sqlite:///{0}'.format(settings.local_db_name))
 Session = sessionmaker(bind=engine)
 Base = declarative_base()
