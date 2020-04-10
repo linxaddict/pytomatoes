@@ -11,6 +11,11 @@ from data.model import Schedule
 
 
 class ScheduleRepository:
+    """
+    Repository of schedules that allows for fetching the schedule in the online-first fashion. If it's not possible
+    to fetch the schedule from Firebase, local database is used.
+    """
+
     def __init__(self, firebase_backend: FirebaseBackend, plan_item_dao: PlanItemDao, schedule_dao: ScheduleDao,
                  logger: Logger):
         self._firebase_backend = firebase_backend
@@ -19,6 +24,10 @@ class ScheduleRepository:
         self._logger = logger
 
     async def fetch(self) -> Optional[Schedule]:
+        """
+        Fetches the schedule using Firebase backend as primary data source and local database as the secondary.
+        :return: schedule or None if it cannot be fetched
+        """
         try:
             schedule = await self._firebase_backend.fetch_schedule()
             await self._schedule_dao.store(map_schedule_to_entity(schedule))
@@ -37,5 +46,9 @@ class ScheduleRepository:
             return Schedule(plan=plan_items, active=schedule_entity.active)
 
     async def update_schedule(self, schedule: Schedule) -> None:
+        """
+        Updates the schedule and stores updated data both in Firebase backend and in the local database.
+        :param schedule: updated schedule
+        """
         await self._schedule_dao.store(map_schedule_to_entity(schedule))
         await self._firebase_backend.update_schedule(schedule)
