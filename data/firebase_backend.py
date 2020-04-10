@@ -11,6 +11,10 @@ from data.model import Schedule, PlanItem
 
 @dataclass
 class FirebaseConfig:
+    """
+    Represents the set of all data needed to properly initialize Firebase client.
+    """
+
     apiKey: str
     authDomain: str
     databaseURL: str
@@ -20,6 +24,9 @@ class FirebaseConfig:
 
 
 def authenticate(func: Any):
+    """
+    Simple decorator that authenticates Firebase user.
+    """
     @functools.wraps(func)
     async def wrapped(*args: List[Any], **kwargs):
         # noinspection PyUnresolvedReferences
@@ -30,7 +37,21 @@ def authenticate(func: Any):
 
 
 class FirebaseBackend:
+    """
+    Represents Firebase backend that provides access to the schedule and some config and diagnostic data. It allows
+    for fetching and updating the schedule, sending short execution log and sending health checks.
+    """
+
+    """
+    Specifies time to live of the authentication token. It's not always provided by Firebase and in such situations
+    default value of 1 hour is used.
+    """
     TOKEN_TTL = 3600
+
+    """
+    Specifies when the authentication token should be refreshed before exceeding it's time to live. It's just a small
+    time margin for avoiding 401 errors.
+    """
     TOKEN_REFRESH_TIME_MARGIN = 300
 
     def __init__(self, config: FirebaseConfig):
@@ -64,6 +85,9 @@ class FirebaseBackend:
         return auth.refresh(refresh_token=self._refresh_token)
 
     async def authenticate_if_needed(self) -> None:
+        """
+        Authenticates Firebase user if the token is invalid.
+        """
         self._time_to_refresh = (self._refresh_time - datetime.datetime.now()).total_seconds()
         if self._time_to_refresh <= self.TOKEN_REFRESH_TIME_MARGIN:
             if not self._refresh_token:
@@ -77,6 +101,10 @@ class FirebaseBackend:
 
     @authenticate
     async def fetch_schedule(self) -> Schedule:
+        """
+        Fetches the schedule and returns its domain model.
+        """
+
         plan = self.db.child('plan').get().val()
         return Schedule([
             PlanItem(time=item['time'], water=int(item['water'])) for item in plan
@@ -84,6 +112,10 @@ class FirebaseBackend:
 
     @authenticate
     async def update_schedule(self, schedule: Schedule) -> None:
+        """
+        Updates the schedule.
+        :param schedule: updated schedule
+        """
         data = {
             'plan': [
                 {'time': p.time, 'water': p.water} for p in schedule.plan
@@ -94,6 +126,12 @@ class FirebaseBackend:
 
     @authenticate
     async def send_execution_log(self, timestamp: str, water: int) -> None:
+        """
+        Updates data about last pump activation. This may be helpful for checking if the pump was actually activated
+        when it should be according to the schedule.
+        :param timestamp: timestamp of pump activation
+        :param water: amount of water that was pumped
+        """
         data = {
             'last_activation': {
                 'timestamp': timestamp,
@@ -105,6 +143,10 @@ class FirebaseBackend:
 
     @authenticate
     async def send_health_check(self, timestamp: str) -> None:
+        """
+        Sends current timestamp so the user can check if his device is alive.
+        :param timestamp: current timestamp
+        """
         data = {
             'health_check': timestamp
         }
