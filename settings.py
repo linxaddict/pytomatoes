@@ -8,7 +8,10 @@ class Settings:
 
     def __init__(self, api_key: str = None, auth_domain: str = None, database_url: str = None,
                  storage_bucket: str = None, firebase_email: str = None, firebase_password: str = None,
-                 local_db_name: str = None):
+                 local_db_name: str = None, pin_number: int = None, ml_per_second: int = None):
+        from dotenv import load_dotenv
+        load_dotenv()
+
         self._api_key = api_key or os.getenv('API_KEY')
         self._auth_domain = auth_domain or os.getenv('AUTH_DOMAIN')
         self._database_url = database_url or os.getenv('DATABASE_URL')
@@ -16,6 +19,8 @@ class Settings:
         self._firebase_email = firebase_email or os.getenv('EMAIL')
         self._firebase_password = firebase_password or os.getenv('PASSWORD')
         self._local_db_name = local_db_name or 'db.sqlite3'
+        self._pin_number = pin_number or 21
+        self._ml_per_second = ml_per_second or 18
 
     @property
     def api_key(self) -> str:
@@ -44,6 +49,14 @@ class Settings:
     @property
     def local_db_name(self) -> str:
         return self._local_db_name
+
+    @property
+    def pin_number(self) -> int:
+        return self._pin_number
+
+    @property
+    def ml_per_seconds(self) -> int:
+        return self._ml_per_second
 
     @property
     def firebase_aggregated_config(self) -> dict:

@@ -12,16 +12,18 @@ from pump.pump import Pump
 from schedule_executor import ScheduleExecutor
 from settings import Settings
 
-GPIO_PIN = 21
 
-
-async def main():
-    from dotenv import load_dotenv
-    load_dotenv()
+async def main() -> None:
+    """
+    Main function that is responsible for:
+        - creating and configuring all the components,
+        - starting infinite schedule execution,
+        - starting infinite health check loop.
+    """
 
     settings = Settings()
-    firebase_config = settings.firebase_aggregated_config
 
+    firebase_config = settings.firebase_aggregated_config
     firebase_backend = FirebaseBackend(FirebaseConfig(**firebase_config))
     session = Session()
 
@@ -32,7 +34,7 @@ async def main():
     schedule_repository = ScheduleRepository(firebase_backend, plan_item_dao, schedule_dao, logger)
     pump_activation_repository = PumpActivationRepository(pump_activation_dao)
 
-    pump = Pump(gpio_pin=GPIO_PIN)
+    pump = Pump(gpio_pin=settings.pin_number, ml_per_second=settings.ml_per_seconds)
 
     schedule_executor = ScheduleExecutor(firebase_backend=firebase_backend, schedule_repository=schedule_repository,
                                          pump_activation_repository=pump_activation_repository, pump=pump,
