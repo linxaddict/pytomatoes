@@ -11,8 +11,23 @@ from pump.pump import Pump
 
 
 class ScheduleExecutor:
+    """
+    Manages water pump activation by executing the schedule defined by the user.
+    """
+
+    """
+    Specifies how often the schedule should po fetched from Firebase.
+    """
     INTERVAL = 5
+
+    """
+    Date and time format for all timestamps.
+    """
     DATE_TIME_FORMAT = '%Y-%m-%dT%H:%M:%S'
+
+    """
+    Time format for used for describing time slots in the schedule.
+    """
     TIME_FORMAT = '%H:%M'
 
     def __init__(self, firebase_backend: FirebaseBackend, schedule_repository: ScheduleRepository,
@@ -27,6 +42,11 @@ class ScheduleExecutor:
 
     @staticmethod
     def extract_slot_ts(item: PlanItem) -> str:
+        """
+        Extracts the timestamp of given plan item in DATE_TIME_FORMAT.
+        :param item: plan item
+        :return: properly formatted timestamp
+        """
         time = datetime.strptime(item.time, ScheduleExecutor.TIME_FORMAT).time()
         slot = datetime.combine(date.today(), time)
 
@@ -35,6 +55,14 @@ class ScheduleExecutor:
     @staticmethod
     async def should_start_pump(item: PlanItem, activation_repository: PumpActivationRepository,
                                 margin_in_minutes=60) -> bool:
+        """
+        Checks if the water pump should be activated for given plan item taking into account time margin. The margin
+        specifies the limit beyond which plan items are recognized as invalid and are not executed.
+        :param item: plan item
+        :param activation_repository: pump activation data source
+        :param margin_in_minutes: the margin for determining if given plan item is still valid
+        :return:true if the plan item should be executed
+        """
         time = datetime.strptime(item.time, ScheduleExecutor.TIME_FORMAT).time()
         now = datetime.now().time()
 
@@ -47,6 +75,12 @@ class ScheduleExecutor:
             slot_str)
 
     async def execute(self, margin_in_minutes=60) -> None:
+        """
+        Runs an infinite loop in which the schedule is constantly fetched and its items are executed. This method
+        contains the logic responsible for managing water pump activation with regard to the timetable created by
+        the user.
+        :param margin_in_minutes: the margin for determining if given plan item is still valid
+        """
         loop = asyncio.get_event_loop()
 
         while True:
@@ -75,6 +109,10 @@ class ScheduleExecutor:
             await asyncio.sleep(self.INTERVAL),
 
     async def run_health_check_loop(self, interval=INTERVAL) -> None:
+        """
+        Runs an infinite loop in which health checks are sent so the user knows that his device is alive.
+        :param interval: interval between health checks
+        """
         while True:
             await asyncio.gather(
                 asyncio.sleep(interval),
