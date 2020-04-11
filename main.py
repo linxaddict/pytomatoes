@@ -40,10 +40,13 @@ async def main() -> None:
                                          pump_activation_repository=pump_activation_repository, pump=pump,
                                          logger=logger)
 
-    await asyncio.gather(
-        schedule_executor.execute(),
-        schedule_executor.run_health_check_loop()
-    )
+    try:
+        await asyncio.gather(
+            schedule_executor.execute(),
+            schedule_executor.run_health_check_loop()
+        )
+    except Exception as e:
+        logger.error('unexpected error occurred:', e)
 
 
 if __name__ == "__main__":
