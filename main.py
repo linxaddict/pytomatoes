@@ -40,13 +40,15 @@ async def main() -> None:
                                          pump_activation_repository=pump_activation_repository, pump=pump,
                                          logger=logger)
 
-    try:
-        await asyncio.gather(
-            schedule_executor.execute(),
-            schedule_executor.run_health_check_loop()
-        )
-    except Exception as e:
-        logger.error('unexpected error occurred:', e)
+    while True:
+        # noinspection PyBroadException
+        try:
+            await asyncio.gather(
+                schedule_executor.execute(),
+                schedule_executor.run_health_check_loop()
+            )
+        except Exception:
+            logger.error('unexpected error occurred', exc_info=True)
 
 
 if __name__ == "__main__":
