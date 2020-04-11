@@ -81,7 +81,6 @@ class ScheduleExecutor:
         the user.
         :param margin_in_minutes: the margin for determining if given plan item is still valid
         """
-        a = 1 / 0
         loop = asyncio.get_event_loop()
 
         while True:
