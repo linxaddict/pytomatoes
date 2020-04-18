@@ -20,7 +20,7 @@ class Settings:
         self._firebase_password = firebase_password or os.getenv('PASSWORD')
         self._local_db_name = local_db_name or 'db.sqlite3'
         self._pin_number = pin_number or 21
-        self._ml_per_second = ml_per_second or 40
+        self._ml_per_second = ml_per_second or 34
 
     @property
     def api_key(self) -> str:
