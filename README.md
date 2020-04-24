@@ -27,7 +27,9 @@ Additionaly in the settings you can optionally set:
 
 # Running
 
-Create .env file with required environment variables and then execute in a shell:
+1. Create .env file with required environment variables
+2. Create a schedule in the firebase real time database according to pytomatoes-firebase-example.json
+3. Execute in a shell:
 
 ```sh
 $ python3 -m venv venv
