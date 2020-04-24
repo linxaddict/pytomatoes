@@ -1,0 +1,18 @@
+CREATE TABLE schedules (
+	id INTEGER NOT NULL, active boolean not null default 1, 
+	PRIMARY KEY (id)
+);
+CREATE TABLE plan_items (
+	id INTEGER NOT NULL, 
+	time VARCHAR, 
+	water INTEGER, 
+	schedule_id INTEGER, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(schedule_id) REFERENCES schedules (id)
+);
+CREATE TABLE pump_activations (
+	id INTEGER NOT NULL,
+	timestamp VARCHAR,
+	water INTEGER,
+	PRIMARY KEY (id)
+);
