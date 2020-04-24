@@ -1,0 +1,15 @@
+{
+  "active" : true,
+  "health_check" : "2020-04-24T21:06:38",
+  "last_activation" : {
+    "timestamp" : "2020-04-24T20:43:52",
+    "water" : 150
+  },
+  "plan" : [ {
+    "time" : "05:30",
+    "water" : 150
+  }, {
+    "time" : "20:00",
+    "water" : 150
+  } ]
+}
