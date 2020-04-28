@@ -30,15 +30,22 @@ class Pump:
 
     def on(self, water_in_ml: int) -> None:
         """
-        TUrns on the pump.
+        Turns on the pump.
         :param water_in_ml: specifies how much water should flow through the pump
         """
         self._output_device.on()
         sleep(self._calculate_watering_time(water_in_ml))
         self._output_device.off()
 
+    def on_async(self, water_in_ml: int) -> None:
+        """
+        Turns on the pump on a dedicated GPIO thread.
+        :param water_in_ml: specifies how much water should flow through the pump
+        """
+        self._output_device.blink(on_time=self._calculate_watering_time(water_in_ml), n=1, background=True)
+
     def off(self) -> None:
         """
-        TUrns off the pump.
+        Turns off the pump.
         """
         self._output_device.off()

@@ -1,5 +1,4 @@
 import asyncio
-from concurrent.futures.thread import ThreadPoolExecutor
 from datetime import datetime, date
 from logging import Logger
 
@@ -37,8 +36,6 @@ class ScheduleExecutor:
         self._pump_activation_repository = pump_activation_repository
         self._pump = pump
         self._logger = logger
-
-        self._background_executor = ThreadPoolExecutor(max_workers=1)
 
     @staticmethod
     def extract_slot_ts(item: PlanItem) -> str:
@@ -81,8 +78,6 @@ class ScheduleExecutor:
         the user.
         :param margin_in_minutes: the margin for determining if given plan item is still valid
         """
-        loop = asyncio.get_event_loop()
-
         while True:
             schedule = await self._schedule_repository.fetch()
 
@@ -93,15 +88,14 @@ class ScheduleExecutor:
                             slot_ts = self.extract_slot_ts(item)
 
                             self._logger.info('activating the pump, ts: {0}, water: {1} ml'.format(slot_ts, item.water))
+                            self._pump.on_async(item.water)
 
                             await asyncio.gather(
                                 self._pump_activation_repository.store(
                                     PumpActivation(timestamp=slot_ts, water=item.water)),
                                 self._firebase_backend.send_execution_log(
                                     timestamp=datetime.now().strftime(ScheduleExecutor.DATE_TIME_FORMAT),
-                                    water=item.water),
-                                loop.run_in_executor(executor=self._background_executor,
-                                                     func=lambda: self._pump.on(item.water))
+                                    water=item.water)
                             )
                 except Exception as e:
                     self._logger.error('an exception occurred: {0}'.format(e))
