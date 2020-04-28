@@ -49,6 +49,8 @@ async def main() -> None:
             )
         except Exception:
             logger.error('unexpected error occurred', exc_info=True)
+            logger.info('pausing for 60 seconds')
+            await asyncio.sleep(60)
 
 
 if __name__ == "__main__":
