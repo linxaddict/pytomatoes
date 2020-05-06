@@ -20,7 +20,7 @@ class Settings:
         self._firebase_email = firebase_email or os.getenv('EMAIL')
         self._firebase_password = firebase_password or os.getenv('PASSWORD')
         self._local_db_name = local_db_name or 'db.sqlite3'
-        self._ml_per_second = ml_per_second or os.getenv('ML_PER_SECOND')
+        self._ml_per_second = int(ml_per_second or os.getenv('ML_PER_SECOND'))
         self._pin_number = pin_number or os.getenv('PIN')
 
     @property
