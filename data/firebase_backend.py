@@ -28,6 +28,7 @@ def authenticate(func: Any):
     """
     Simple decorator that authenticates Firebase user.
     """
+
     @functools.wraps(func)
     async def wrapped(*args: List[Any], **kwargs):
         # noinspection PyUnresolvedReferences
@@ -119,16 +120,12 @@ class FirebaseBackend:
         :param schedule: updated schedule
         """
         data = {
-            'nodes': {
-                self._node: {
-                    'plan': [
-                        {'time': p.time, 'water': p.water} for p in schedule.plan
-                    ]
-                }
-            }
+            'plan': [
+                {'time': p.time, 'water': p.water} for p in schedule.plan
+            ]
         }
 
-        self.db.update(data)
+        self.db.child('nodes').child(self._node).update(data)
 
     @authenticate
     async def send_execution_log(self, timestamp: str, water: int) -> None:
@@ -139,17 +136,13 @@ class FirebaseBackend:
         :param water: amount of water that was pumped
         """
         data = {
-            'nodes': {
-                self._node: {
-                    'last_activation': {
-                        'timestamp': timestamp,
-                        'water': water
-                    }
-                }
+            'last_activation': {
+                'timestamp': timestamp,
+                'water': water
             }
         }
 
-        self.db.update(data)
+        self.db.child('nodes').child(self._node).update(data)
 
     @authenticate
     async def send_health_check(self, timestamp: str) -> None:
@@ -158,11 +151,7 @@ class FirebaseBackend:
         :param timestamp: current timestamp
         """
         data = {
-            'nodes': {
-                self._node: {
-                    'health_check': timestamp
-                }
-            }
+            'health_check': timestamp
         }
 
-        self.db.update(data)
+        self.db.child('nodes').child(self._node).update(data)
