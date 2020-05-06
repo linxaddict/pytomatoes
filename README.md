@@ -10,7 +10,7 @@ PyTomatoes is a python application designed for taking care of plants watering (
 
 # Requirements
 
-You need to have a Firebase account, create a project and set (or put in a file named .env) these environemnt variables:
+You need to have a Firebase account, create a project and set (or put in a file named .env) these environment variables:
 
 * API_KEY
 * AUTH_DOMAIN
@@ -18,12 +18,12 @@ You need to have a Firebase account, create a project and set (or put in a file 
 * STORAGE_BUCKET
 * EMAIL
 * PASSWORD
+* NODE (see pytomatoes-firebase-example.json)
 
-Additionaly in the settings you can optionally set:
+Add these variables to configure hardware details:
 
-* local database name - used for caching the schedule
-* pin number - responsible for activating the pump through a transistor
-* ml per second - determines how much water goes through the pump in a second, this should be measured manually
+* PIN - pin responsible for activating the pump through a transistor
+* ML_PER_SECOND - determines how much water goes through the pump in a second, this should be measured manually
 
 # Running
 
