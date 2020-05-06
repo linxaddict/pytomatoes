@@ -6,7 +6,7 @@ class Settings:
     Contains the configuration settings.
     """
 
-    def __init__(self, api_key: str = None, auth_domain: str = None, database_url: str = None,
+    def __init__(self, api_key: str = None, auth_domain: str = None, database_url: str = None, node: str = None,
                  storage_bucket: str = None, firebase_email: str = None, firebase_password: str = None,
                  local_db_name: str = None, pin_number: int = None, ml_per_second: int = None):
         from dotenv import load_dotenv
@@ -15,6 +15,7 @@ class Settings:
         self._api_key = api_key or os.getenv('API_KEY')
         self._auth_domain = auth_domain or os.getenv('AUTH_DOMAIN')
         self._database_url = database_url or os.getenv('DATABASE_URL')
+        self._node = node or os.getenv('NODE')
         self._storage_bucket = storage_bucket or os.getenv('STORAGE_BUCKET')
         self._firebase_email = firebase_email or os.getenv('EMAIL')
         self._firebase_password = firebase_password or os.getenv('PASSWORD')
@@ -33,6 +34,10 @@ class Settings:
     @property
     def database_url(self) -> str:
         return self._database_url
+
+    @property
+    def node(self) -> str:
+        return self._node
 
     @property
     def storage_bucket(self) -> str:
@@ -65,6 +70,7 @@ class Settings:
             'authDomain': self.auth_domain,
             'databaseURL': self.database_url,
             'storageBucket': self.storage_bucket,
+            'node': self.node,
             'email': self.firebase_email,
             'password': self.firebase_password
         }

@@ -19,6 +19,7 @@ class FirebaseConfig:
     authDomain: str
     databaseURL: str
     storageBucket: str
+    node: str
     email: str
     password: str
 
@@ -60,6 +61,7 @@ class FirebaseBackend:
 
         self._email = config.email
         self._password = config.password
+        self._node = config.node
 
         self._refresh_token = None
         self._refresh_time = datetime.datetime.now()
@@ -105,7 +107,7 @@ class FirebaseBackend:
         Fetches the schedule and returns its domain model.
         """
 
-        plan = self.db.child('plan').get().val()
+        plan = self.db.child('nodes').child(self._node).child('plan').get().val()
         return Schedule([
             PlanItem(time=item['time'], water=int(item['water'])) for item in plan
         ], active=bool(self.db.child('active').get().val()))
@@ -117,9 +119,13 @@ class FirebaseBackend:
         :param schedule: updated schedule
         """
         data = {
-            'plan': [
-                {'time': p.time, 'water': p.water} for p in schedule.plan
-            ]
+            'nodes': {
+                self._node: {
+                    'plan': [
+                        {'time': p.time, 'water': p.water} for p in schedule.plan
+                    ]
+                }
+            }
         }
 
         self.db.update(data)
@@ -133,9 +139,13 @@ class FirebaseBackend:
         :param water: amount of water that was pumped
         """
         data = {
-            'last_activation': {
-                'timestamp': timestamp,
-                'water': water
+            'nodes': {
+                self._node: {
+                    'last_activation': {
+                        'timestamp': timestamp,
+                        'water': water
+                    }
+                }
             }
         }
 
@@ -148,7 +158,11 @@ class FirebaseBackend:
         :param timestamp: current timestamp
         """
         data = {
-            'health_check': timestamp
+            'nodes': {
+                self._node: {
+                    'health_check': timestamp
+                }
+            }
         }
 
         self.db.update(data)
