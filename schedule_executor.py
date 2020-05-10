@@ -3,7 +3,7 @@ from datetime import datetime, date
 from logging import Logger
 
 from data.firebase_backend import FirebaseBackend
-from data.model import PlanItem, PumpActivation
+from data.model import PlanItem, PumpActivation, OneTimeActivation
 from data.pump_activation_repository import PumpActivationRepository
 from data.schedule_repository import ScheduleRepository
 from pump.pump import Pump
@@ -71,6 +71,26 @@ class ScheduleExecutor:
         return now > time and delta.seconds < margin_in_minutes * 60 and not await activation_repository.exists(
             slot_str)
 
+    @staticmethod
+    async def should_start_one_time_activation(item: OneTimeActivation, activation_repository: PumpActivationRepository,
+                                               margin_in_minutes=60) -> bool:
+        """
+        Checks if the water pump should be activated for given activation item taking into account time margin.
+        The margin specifies the limit beyond which plan items are recognized as invalid and are not executed.
+        :param item: one-time activation item
+        :param activation_repository: pump activation data source
+        :param margin_in_minutes: the margin for determining if given plan item is still valid
+        :return:true if the activate item should be executed
+        """
+        one_time_date = datetime.strptime(item.date, ScheduleExecutor.DATE_TIME_FORMAT)
+        now = datetime.now()
+
+        slot_str = one_time_date.strftime(ScheduleExecutor.DATE_TIME_FORMAT)
+        delta = now - one_time_date
+
+        return now > one_time_date and delta.seconds < margin_in_minutes * 60 \
+               and not await activation_repository.exists(slot_str)
+
     async def execute(self, margin_in_minutes=60) -> None:
         """
         Runs an infinite loop in which the schedule is constantly fetched and its items are executed. This method
@@ -83,6 +103,22 @@ class ScheduleExecutor:
 
             if schedule and schedule.active:
                 try:
+                    if schedule.one_time_activation and await self.should_start_one_time_activation(
+                            schedule.one_time_activation, self._pump_activation_repository, margin_in_minutes):
+                        slot_ts = schedule.one_time_activation.date
+
+                        self._logger.info('activating the pump, ts: {0}, water: {1} ml'.format(
+                            slot_ts, schedule.one_time_activation.water))
+                        self._pump.on_async(schedule.one_time_activation.water)
+
+                        await asyncio.gather(
+                            self._pump_activation_repository.store(
+                                PumpActivation(timestamp=slot_ts, water=schedule.one_time_activation.water)),
+                            self._firebase_backend.send_execution_log(
+                                timestamp=datetime.now().strftime(ScheduleExecutor.DATE_TIME_FORMAT),
+                                water=schedule.one_time_activation.water)
+                        )
+
                     for item in schedule.plan:
                         if await self.should_start_pump(item, self._pump_activation_repository, margin_in_minutes):
                             slot_ts = self.extract_slot_ts(item)

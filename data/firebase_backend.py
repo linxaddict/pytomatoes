@@ -6,7 +6,7 @@ from typing import Dict, Any, List
 from pyrebase import pyrebase
 from pyrebase.pyrebase import Firebase
 
-from data.model import Schedule, PlanItem
+from data.model import Schedule, PlanItem, OneTimeActivation
 
 
 @dataclass
@@ -109,9 +109,20 @@ class FirebaseBackend:
         """
 
         plan = self.db.child('nodes').child(self._node).child('plan').get().val()
-        return Schedule([
-            PlanItem(time=item['time'], water=int(item['water'])) for item in plan
-        ], active=bool(self.db.child('nodes').child(self._node).child('active').get().val()))
+        one_time_activation = None
+        if self.db.child('nodes').child(self._node).child('one_time').child('water').get().val():
+            one_time_activation = OneTimeActivation(
+                date=self.db.child('nodes').child(self._node).child('one_time').child('date').get().val(),
+                water=int(self.db.child('nodes').child(self._node).child('one_time').child('water').get().val()),
+            )
+
+        return Schedule(
+            [
+                PlanItem(time=item['time'], water=int(item['water'])) for item in plan
+            ],
+            active=bool(self.db.child('nodes').child(self._node).child('active').get().val()),
+            one_time_activation=one_time_activation
+        )
 
     @authenticate
     async def update_schedule(self, schedule: Schedule) -> None:
