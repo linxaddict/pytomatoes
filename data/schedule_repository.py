@@ -1,11 +1,10 @@
 from logging import Logger
 from typing import Optional
 
-from requests import HTTPError, Timeout, ConnectionError
-
 from data.db.plan_item_dao import PlanItemDao
 from data.db.schedule_dao import ScheduleDao
-from data.firebase_backend import FirebaseBackend
+from data.firebase.exceptions import FirebaseException
+from data.firebase.firebase_backend import FirebaseBackend
 from data.mapper import map_schedule_to_entity, map_plan_item_entity_to_domain
 from data.model import Schedule
 
@@ -32,7 +31,7 @@ class ScheduleRepository:
             schedule = await self._firebase_backend.fetch_schedule()
             await self._schedule_dao.store(map_schedule_to_entity(schedule))
             return schedule
-        except (HTTPError, ConnectionError, Timeout) as e:
+        except FirebaseException as e:
             self._logger.error('could not fetch the schedule: {0)'.format(e))
             self._logger.info('fetching the schedule from local database')
 
@@ -47,8 +46,7 @@ class ScheduleRepository:
 
     async def update_schedule(self, schedule: Schedule) -> None:
         """
-        Updates the schedule and stores updated data both in Firebase backend and in the local database.
+        Updates the schedule and stores updated data in the local database.
         :param schedule: updated schedule
         """
         await self._schedule_dao.store(map_schedule_to_entity(schedule))
-        await self._firebase_backend.update_schedule(schedule)
