@@ -1,10 +1,12 @@
 import asyncio
 
+from aiohttp import ClientSession
+
 from data.db.db_common import Session
 from data.db.plan_item_dao import PlanItemDao
 from data.db.pump_activation_dao import PumpActivationDao
 from data.db.schedule_dao import ScheduleDao
-from data.firebase_backend import FirebaseBackend, FirebaseConfig
+from data.firebase.firebase_backend import FirebaseBackend
 from data.pump_activation_repository import PumpActivationRepository
 from data.schedule_repository import ScheduleRepository
 from log.logger import logger
@@ -23,34 +25,41 @@ async def main() -> None:
 
     settings = Settings()
 
-    firebase_config = settings.firebase_aggregated_config
-    firebase_backend = FirebaseBackend(FirebaseConfig(**firebase_config))
-    session = Session()
+    async with ClientSession() as session:
+        firebase_backend = FirebaseBackend(
+            email=settings.firebase_email,
+            password=settings.firebase_password,
+            api_key=settings.api_key,
+            db_url=settings.database_url,
+            node=settings.node,
+            client_session=session
+        )
+        session = Session()
 
-    plan_item_dao = PlanItemDao(session=session)
-    schedule_dao = ScheduleDao(session=session)
-    pump_activation_dao = PumpActivationDao(session=session)
+        plan_item_dao = PlanItemDao(session=session)
+        schedule_dao = ScheduleDao(session=session)
+        pump_activation_dao = PumpActivationDao(session=session)
 
-    schedule_repository = ScheduleRepository(firebase_backend, plan_item_dao, schedule_dao, logger)
-    pump_activation_repository = PumpActivationRepository(pump_activation_dao)
+        schedule_repository = ScheduleRepository(firebase_backend, plan_item_dao, schedule_dao, logger)
+        pump_activation_repository = PumpActivationRepository(pump_activation_dao)
 
-    pump = Pump(gpio_pin=settings.pin_number, ml_per_second=settings.ml_per_seconds)
+        pump = Pump(gpio_pin=settings.pin_number, ml_per_second=settings.ml_per_seconds)
 
-    schedule_executor = ScheduleExecutor(firebase_backend=firebase_backend, schedule_repository=schedule_repository,
-                                         pump_activation_repository=pump_activation_repository, pump=pump,
-                                         logger=logger)
+        schedule_executor = ScheduleExecutor(firebase_backend=firebase_backend, schedule_repository=schedule_repository,
+                                             pump_activation_repository=pump_activation_repository, pump=pump,
+                                             logger=logger)
 
-    while True:
-        # noinspection PyBroadException
-        try:
-            await asyncio.gather(
-                schedule_executor.execute(),
-                schedule_executor.run_health_check_loop()
-            )
-        except Exception:
-            logger.error('unexpected error occurred', exc_info=True)
-            logger.info('pausing for 60 seconds')
-            await asyncio.sleep(60)
+        while True:
+            # noinspection PyBroadException
+            try:
+                await asyncio.gather(
+                    schedule_executor.execute(),
+                    schedule_executor.run_health_check_loop()
+                )
+            except Exception:
+                logger.error('unexpected error occurred', exc_info=True)
+                logger.info('pausing for 60 seconds')
+                await asyncio.sleep(60)
 
 
 if __name__ == "__main__":

@@ -2,7 +2,7 @@ import asyncio
 from datetime import datetime, date
 from logging import Logger
 
-from data.firebase_backend import FirebaseBackend
+from data.firebase.firebase_backend import FirebaseBackend
 from data.model import PlanItem, PumpActivation, OneTimeActivation
 from data.pump_activation_repository import PumpActivationRepository
 from data.schedule_repository import ScheduleRepository
@@ -112,11 +112,11 @@ class ScheduleExecutor:
                         self._pump.on_async(schedule.one_time_activation.water)
 
                         await asyncio.gather(
-                            self._pump_activation_repository.store(
-                                PumpActivation(timestamp=slot_ts, water=schedule.one_time_activation.water)),
-                            self._firebase_backend.send_execution_log(
+                            self._pump_activation_repository.store(activation=PumpActivation(
+                                timestamp=slot_ts, water=schedule.one_time_activation.water)),
+                            self._firebase_backend.send_execution_log(activation=PumpActivation(
                                 timestamp=datetime.now().strftime(ScheduleExecutor.DATE_TIME_FORMAT),
-                                water=schedule.one_time_activation.water)
+                                water=schedule.one_time_activation.water))
                         )
 
                     for item in schedule.plan:
@@ -129,9 +129,9 @@ class ScheduleExecutor:
                             await asyncio.gather(
                                 self._pump_activation_repository.store(
                                     PumpActivation(timestamp=slot_ts, water=item.water)),
-                                self._firebase_backend.send_execution_log(
+                                self._firebase_backend.send_execution_log(activation=PumpActivation(
                                     timestamp=datetime.now().strftime(ScheduleExecutor.DATE_TIME_FORMAT),
-                                    water=item.water)
+                                    water=item.water))
                             )
                 except Exception as e:
                     self._logger.error('an exception occurred: {0}'.format(e))
@@ -146,5 +146,5 @@ class ScheduleExecutor:
         while True:
             await asyncio.gather(
                 asyncio.sleep(interval),
-                self._firebase_backend.send_health_check(datetime.now().strftime(ScheduleExecutor.DATE_TIME_FORMAT))
+                self._firebase_backend.send_health_check()
             )
