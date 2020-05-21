@@ -42,7 +42,7 @@ class ScheduleRepository:
 
             plan_items = [map_plan_item_entity_to_domain(item) for item in schedule_entity.plan_items]
 
-            return Schedule(plan=plan_items, active=schedule_entity.active)
+            return Schedule(plan=plan_items, active=schedule_entity.active, one_time_activation=None)
 
     async def update_schedule(self, schedule: Schedule) -> None:
         """
