@@ -42,8 +42,7 @@ class Pump:
         Turns on the pump on a dedicated GPIO thread.
         :param water_in_ml: specifies how much water should flow through the pump
         """
-        # self._output_device.blink(on_time=self._calculate_watering_time(water_in_ml), n=1, background=True)
-        print(f"activating pump for {self._calculate_watering_time(water_in_ml)} seconds")
+        self._output_device.blink(on_time=self._calculate_watering_time(water_in_ml), n=1, background=True)
 
     def off(self) -> None:
         """
