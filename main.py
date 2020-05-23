@@ -9,9 +9,12 @@ from data.db.schedule_dao import ScheduleDao
 from data.firebase.firebase_backend import FirebaseBackend
 from data.pump_activation_repository import PumpActivationRepository
 from data.schedule_repository import ScheduleRepository
+from device.pump import Pump
+from interactors.activate_pump import ActivatePump
+from interactors.fetch_schedule import FetchSchedule
+from interactors.run_healthcheck_loop import RunHealthcheckLoop
+from interactors.run_schedule_execution_loop import RunScheduleExecutionLoop
 from log.logger import logger
-from pump.pump import Pump
-from schedule_executor import ScheduleExecutor
 from settings import Settings
 
 
@@ -43,22 +46,36 @@ async def main() -> None:
         schedule_repository = ScheduleRepository(firebase_backend, plan_item_dao, schedule_dao, logger)
         pump_activation_repository = PumpActivationRepository(pump_activation_dao)
 
-        pump = Pump(gpio_pin=settings.pin_number, ml_per_second=settings.ml_per_seconds)
+        pump = Pump(
+            gpio_pin=settings.pin_number,
+            ml_per_second=settings.ml_per_seconds
+        )
 
-        schedule_executor = ScheduleExecutor(firebase_backend=firebase_backend, schedule_repository=schedule_repository,
-                                             pump_activation_repository=pump_activation_repository, pump=pump,
-                                             logger=logger)
+        activate_pump = ActivatePump(
+            pump=pump,
+            repository=pump_activation_repository,
+            firebase=firebase_backend,
+            logger=logger
+        )
+        fetch_schedule = FetchSchedule(schedule_repository=schedule_repository)
+        run_healthcheck_loop = RunHealthcheckLoop(firebase=firebase_backend)
+        run_schedule_execution_loop = RunScheduleExecutionLoop(
+            fetch_schedule=fetch_schedule,
+            activate_pump=activate_pump,
+            repository=pump_activation_repository, logger=logger
+        )
 
         while True:
             # noinspection PyBroadException
             try:
                 await asyncio.gather(
-                    schedule_executor.execute(),
-                    schedule_executor.run_health_check_loop()
+                    run_healthcheck_loop.execute(),
+                    run_schedule_execution_loop.execute()
                 )
             except Exception:
                 logger.error('unexpected error occurred', exc_info=True)
                 logger.info('pausing for 60 seconds')
+
                 await asyncio.sleep(60)
 
 

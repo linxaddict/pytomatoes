@@ -5,7 +5,8 @@ CREATE TABLE schedules (
 CREATE TABLE plan_items (
 	id INTEGER NOT NULL, 
 	time VARCHAR, 
-	water INTEGER, 
+	water INTEGER,
+	active INTEGER,
 	schedule_id INTEGER, 
 	PRIMARY KEY (id), 
 	FOREIGN KEY(schedule_id) REFERENCES schedules (id)

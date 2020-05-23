@@ -6,6 +6,7 @@ from typing import List, Optional
 class PlanItem:
     time: str
     water: int
+    active: bool
 
 
 @dataclass

@@ -7,11 +7,12 @@ from aiohttp.client_exceptions import ClientResponseError, ClientConnectionError
 
 from data.firebase.exceptions import FirebaseResponseError, FirebaseConnectionError, FirebasePayloadError, \
     FirebaseInvalidUrl, FirebaseUnauthorizedError
-from data.firebase.model import AuthData, AuthPayload, AuthRefreshData, AuthRefreshPayload, ExecutionLogPayload, \
-    HealthCheckPayload
-from data.model import PumpActivation, Schedule, OneTimeActivation, PlanItem
-from data.schema import AuthPayloadSchema, AuthSchema, AuthRefreshPayloadSchema, AuthRefreshSchema, ScheduleSchema, \
-    ExecutionLogPayloadSchema, HealthCheckPayloadSchema
+from data.firebase.mapper import map_domain_to_pump_activation
+from data.firebase.model import AuthData, AuthPayload, AuthRefreshData, AuthRefreshPayload, ExecutionLogPayloadData, \
+    HealthCheckPayloadData, ScheduleData, OneTimeActivationData, PlanItemData
+from data.firebase.schema import AuthPayloadSchema, AuthSchema, AuthRefreshPayloadSchema, AuthRefreshSchema, \
+    ExecutionLogPayloadSchema, HealthCheckPayloadSchema, ScheduleSchema
+from domain.model import PumpActivation
 
 
 def map_errors(f):
@@ -139,7 +140,7 @@ class FirebaseBackend:
             await self._get_id_token()
 
     @authenticate
-    async def fetch_schedule(self) -> Schedule:
+    async def fetch_schedule(self) -> ScheduleData:
         """
         Fetches the node data and returns its domain model.
         """
@@ -156,16 +157,16 @@ class FirebaseBackend:
 
         one_time_activation = None
         if 'one_time' in loaded_data:
-            one_time_activation = OneTimeActivation(
+            one_time_activation = OneTimeActivationData(
                 date=loaded_data['one_time']['date'],
                 water=loaded_data['one_time']['water']
             )
 
         plan = []
         if 'plan' in loaded_data:
-            plan = [PlanItem(time=p['time'], water=p['water']) for p in loaded_data['plan']]
+            plan = [PlanItemData(time=p['time'], water=p['water'], active=p['active']) for p in loaded_data['plan']]
 
-        return Schedule(
+        return ScheduleData(
             plan=plan,
             active=loaded_data.get('active', False),
             one_time_activation=one_time_activation
@@ -178,7 +179,7 @@ class FirebaseBackend:
         when it should be according to the schedule.
         :param activation: activation details with timestamp and water amount
         """
-        execution_log = ExecutionLogPayload(last_activation=activation)
+        execution_log = ExecutionLogPayloadData(last_activation=map_domain_to_pump_activation(activation))
         schema = ExecutionLogPayloadSchema()
 
         raw_response = await self._patch(url=self._append_auth_token(url=self._node_url),
@@ -197,7 +198,7 @@ class FirebaseBackend:
         """
         Sends current timestamp so the user can check if his device is alive.
         """
-        health_check = HealthCheckPayload(health_check=datetime.now())
+        health_check = HealthCheckPayloadData(health_check=datetime.now())
         schema = HealthCheckPayloadSchema()
 
         raw_response = await self._patch(url=self._append_auth_token(url=self._node_url),

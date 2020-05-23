@@ -62,15 +62,3 @@ class Settings:
     @property
     def ml_per_seconds(self) -> int:
         return self._ml_per_second
-
-    @property
-    def firebase_aggregated_config(self) -> dict:
-        return {
-            'apiKey': self.api_key,
-            'authDomain': self.auth_domain,
-            'databaseURL': self.database_url,
-            'storageBucket': self.storage_bucket,
-            'node': self.node,
-            'email': self.firebase_email,
-            'password': self.firebase_password
-        }
