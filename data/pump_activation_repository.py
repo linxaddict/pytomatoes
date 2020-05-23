@@ -1,7 +1,7 @@
 from typing import List
 
 from data.db.pump_activation_dao import PumpActivationDao
-from data.mapper import map_pump_activation_entity_to_domain, \
+from data.db.mapper import map_pump_activation_entity_to_domain, \
     map_pump_activation_to_entity
 from domain.model import PumpActivation
 

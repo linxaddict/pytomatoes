@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 from datetime import datetime
-
-from domain.model import PumpActivation
+from typing import Optional, List
 
 
 @dataclass
@@ -41,10 +40,35 @@ class AuthRefreshData:
 
 
 @dataclass
-class ExecutionLogPayload:
-    last_activation: PumpActivation
+class HealthCheckPayloadData:
+    health_check: datetime
 
 
 @dataclass
-class HealthCheckPayload:
-    health_check: datetime
+class PlanItemData:
+    time: str
+    water: int
+
+
+@dataclass
+class OneTimeActivationData:
+    date: str
+    water: int
+
+
+@dataclass
+class ScheduleData:
+    plan: List[PlanItemData]
+    active: bool
+    one_time_activation: Optional[OneTimeActivationData]
+
+
+@dataclass
+class PumpActivationData:
+    timestamp: str
+    water: int
+
+
+@dataclass
+class ExecutionLogPayloadData:
+    last_activation: PumpActivationData
