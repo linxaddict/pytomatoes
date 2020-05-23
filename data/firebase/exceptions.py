@@ -1,6 +1,6 @@
 from typing import Optional
 
-from aiohttp.client_exceptions import ClientResponse
+from aiohttp import ClientResponse
 
 
 class FirebaseException(Exception):

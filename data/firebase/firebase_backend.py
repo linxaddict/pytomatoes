@@ -9,9 +9,10 @@ from data.firebase.exceptions import FirebaseResponseError, FirebaseConnectionEr
     FirebaseInvalidUrl, FirebaseUnauthorizedError
 from data.firebase.model import AuthData, AuthPayload, AuthRefreshData, AuthRefreshPayload, ExecutionLogPayload, \
     HealthCheckPayload
-from data.model import PumpActivation, Schedule, OneTimeActivation, PlanItem
-from data.schema import AuthPayloadSchema, AuthSchema, AuthRefreshPayloadSchema, AuthRefreshSchema, ScheduleSchema, \
+from data.schema import AuthPayloadSchema, AuthSchema, AuthRefreshPayloadSchema, AuthRefreshSchema, \
     ExecutionLogPayloadSchema, HealthCheckPayloadSchema
+from domain.model import PumpActivation, Schedule, OneTimeActivation, PlanItem
+from domain.schema import ScheduleSchema
 
 
 def map_errors(f):

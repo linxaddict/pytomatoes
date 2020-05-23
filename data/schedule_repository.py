@@ -6,7 +6,7 @@ from data.db.schedule_dao import ScheduleDao
 from data.firebase.exceptions import FirebaseException
 from data.firebase.firebase_backend import FirebaseBackend
 from data.mapper import map_schedule_to_entity, map_plan_item_entity_to_domain
-from data.model import Schedule
+from domain.model import Schedule
 
 
 class ScheduleRepository:
