@@ -1,12 +1,13 @@
 from logging import Logger
 from typing import Optional
 
+from data.db.mapper import map_schedule_to_entity, map_plan_item_entity_to_domain
 from data.db.plan_item_dao import PlanItemDao
 from data.db.schedule_dao import ScheduleDao
 from data.firebase.exceptions import FirebaseException
 from data.firebase.firebase_backend import FirebaseBackend
-from data.mapper import map_schedule_to_entity, map_plan_item_entity_to_domain
-from data.model import Schedule
+from data.firebase.mapper import map_schedule_to_domain
+from domain.model import Schedule
 
 
 class ScheduleRepository:
@@ -28,7 +29,7 @@ class ScheduleRepository:
         :return: schedule or None if it cannot be fetched
         """
         try:
-            schedule = await self._firebase_backend.fetch_schedule()
+            schedule = map_schedule_to_domain(await self._firebase_backend.fetch_schedule())
             await self._schedule_dao.store(map_schedule_to_entity(schedule))
             return schedule
         except FirebaseException as e:

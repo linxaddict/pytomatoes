@@ -1,5 +1,5 @@
 from data.db.model import ScheduleEntity, PlanItemEntity, PumpActivationEntity
-from data.model import Schedule, PlanItem, PumpActivation
+from domain.model import Schedule, PlanItem, PumpActivation
 
 
 def map_plan_item_to_entity(plan_item: PlanItem) -> PlanItemEntity:
