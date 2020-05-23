@@ -48,6 +48,7 @@ class HealthCheckPayloadData:
 class PlanItemData:
     time: str
     water: int
+    active: bool
 
 
 @dataclass

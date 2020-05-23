@@ -5,14 +5,16 @@ from domain.model import PlanItem, PumpActivation, Schedule, OneTimeActivation
 def map_plan_item_to_domain(plan_item: PlanItemData) -> PlanItem:
     return PlanItem(
         time=plan_item.time,
-        water=plan_item.water
+        water=plan_item.water,
+        active=plan_item.active
     )
 
 
 def map_domain_to_plan_item(plan_item: PlanItem) -> PlanItemData:
     return PlanItemData(
         time=plan_item.time,
-        water=plan_item.water
+        water=plan_item.water,
+        active=plan_item.active
     )
 
 

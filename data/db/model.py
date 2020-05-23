@@ -1,5 +1,6 @@
 from sqlalchemy import Column, Integer, String, Boolean, ForeignKey
 from sqlalchemy.orm import relationship
+
 from data.db.db_common import Base
 
 
@@ -28,12 +29,15 @@ class PlanItemEntity(Base):
     id = Column(Integer, primary_key=True)
     time = Column(String)
     water = Column(Integer)
+    active = Column(Boolean)
 
     schedule_id = Column(Integer, ForeignKey('schedules.id'))
     schedule = relationship('ScheduleEntity', back_populates="plan_items")
 
     def __repr__(self) -> str:
-        return "<PlanItem(id='{0}', time='{1}', water='{2}')>".format(self.id, self.time, self.water)
+        return "<PlanItem(id='{0}', time='{1}', water='{2}', active='{3}')>".format(
+            self.id, self.time, self.water, self.active
+        )
 
 
 class PumpActivationEntity(Base):

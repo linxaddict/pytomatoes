@@ -7,10 +7,12 @@ from aiohttp.client_exceptions import ClientResponseError, ClientConnectionError
 
 from data.firebase.exceptions import FirebaseResponseError, FirebaseConnectionError, FirebasePayloadError, \
     FirebaseInvalidUrl, FirebaseUnauthorizedError
+from data.firebase.mapper import map_domain_to_pump_activation
 from data.firebase.model import AuthData, AuthPayload, AuthRefreshData, AuthRefreshPayload, ExecutionLogPayloadData, \
-    HealthCheckPayloadData, ScheduleData, OneTimeActivationData, PlanItemData, PumpActivationData
+    HealthCheckPayloadData, ScheduleData, OneTimeActivationData, PlanItemData
 from data.firebase.schema import AuthPayloadSchema, AuthSchema, AuthRefreshPayloadSchema, AuthRefreshSchema, \
     ExecutionLogPayloadSchema, HealthCheckPayloadSchema, ScheduleSchema
+from domain.model import PumpActivation
 
 
 def map_errors(f):
@@ -162,7 +164,7 @@ class FirebaseBackend:
 
         plan = []
         if 'plan' in loaded_data:
-            plan = [PlanItemData(time=p['time'], water=p['water']) for p in loaded_data['plan']]
+            plan = [PlanItemData(time=p['time'], water=p['water'], active=p['active']) for p in loaded_data['plan']]
 
         return ScheduleData(
             plan=plan,
@@ -171,13 +173,13 @@ class FirebaseBackend:
         )
 
     @authenticate
-    async def send_execution_log(self, activation: PumpActivationData) -> bool:
+    async def send_execution_log(self, activation: PumpActivation) -> bool:
         """
         Updates data about last pump activation. This may be helpful for checking if the pump was actually activated
         when it should be according to the schedule.
         :param activation: activation details with timestamp and water amount
         """
-        execution_log = ExecutionLogPayloadData(last_activation=activation)
+        execution_log = ExecutionLogPayloadData(last_activation=map_domain_to_pump_activation(activation))
         schema = ExecutionLogPayloadSchema()
 
         raw_response = await self._patch(url=self._append_auth_token(url=self._node_url),

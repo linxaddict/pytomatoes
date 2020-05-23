@@ -8,7 +8,7 @@ def map_plan_item_to_entity(plan_item: PlanItem) -> PlanItemEntity:
     :param plan_item: domain model
     :return: database model
     """
-    return PlanItemEntity(time=plan_item.time, water=plan_item.water)
+    return PlanItemEntity(time=plan_item.time, water=plan_item.water, active=plan_item.active)
 
 
 def map_schedule_to_entity(schedule: Schedule) -> ScheduleEntity:
@@ -35,7 +35,7 @@ def map_plan_item_entity_to_domain(plan_item: PlanItemEntity) -> PlanItem:
     :param plan_item: database model
     :return: domain model
     """
-    return PlanItem(time=plan_item.time, water=plan_item.water)
+    return PlanItem(time=plan_item.time, water=plan_item.water, active=plan_item.active)
 
 
 def map_schedule_entity_to_domain(schedule: ScheduleEntity) -> Schedule:

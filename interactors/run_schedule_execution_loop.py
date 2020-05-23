@@ -99,7 +99,7 @@ class RunScheduleExecutionLoop:
                         await self._activate_pump.execute(timestamp=schedule.one_time_activation.date,
                                                           water=schedule.one_time_activation.water)
 
-                    for item in schedule.plan:
+                    for item in [pi for pi in schedule.plan if pi.active]:
                         if await self._should_start_pump(item, RunScheduleExecutionLoop.EXECUTION_MARGIN):
                             await self._activate_pump.execute(timestamp=self._extract_slot_ts(item), water=item.water)
                 except Exception as e:

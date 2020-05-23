@@ -49,6 +49,7 @@ class PlanItemSchema(Schema):
 
     time = fields.Str()
     water = fields.Int(missing=0)
+    active = fields.Bool(missing=False)
 
 
 class OneTimeActivationSchema(Schema):
