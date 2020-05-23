@@ -10,7 +10,7 @@ class Pump:
     an instance of this class.
     """
 
-    ML_PER_SECOND = 18
+    ML_PER_SECOND = 18.0
 
     def __init__(self, gpio_pin: int, ml_per_second=ML_PER_SECOND):
         """
@@ -20,13 +20,13 @@ class Pump:
         self._output_device = DigitalOutputDevice(gpio_pin)
         self._ml_per_second = ml_per_second
 
-    def _calculate_watering_time(self, ml: int) -> int:
+    def _calculate_watering_time(self, ml: float) -> float:
         """
         Calculates for how long the pump has to be turned on for given amount of water.
         :param ml: amount of water in ml
         :return: time in seconds
         """
-        return int(ml / self._ml_per_second)
+        return ml / self._ml_per_second
 
     def on(self, water_in_ml: int) -> None:
         """
@@ -34,7 +34,7 @@ class Pump:
         :param water_in_ml: specifies how much water should flow through the pump
         """
         self._output_device.on()
-        sleep(self._calculate_watering_time(water_in_ml))
+        sleep(self._calculate_watering_time(float(water_in_ml)))
         self._output_device.off()
 
     def on_async(self, water_in_ml: int) -> None:
