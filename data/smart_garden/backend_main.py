@@ -54,7 +54,7 @@ async def main() -> None:
             backend=smart_garden_backend,
             logger=logger
         )
-        fetch_circuit = FetchCircuit(schedule_repository=schedule_repository)
+        fetch_circuit = FetchCircuit(circuit_repository=schedule_repository)
         run_healthcheck_loop = RunHealthCheckLoop(backend=smart_garden_backend)
         run_schedule_execution_loop = RunScheduleExecutionLoop(
             fetch_circuit=fetch_circuit,

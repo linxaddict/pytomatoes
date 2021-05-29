@@ -18,7 +18,7 @@ def map_circuit_to_entity(circuit: Circuit) -> CircuitEntity:
     :return: database model
     """
     return CircuitEntity(name=circuit.name,
-                         plan_items=[map_scheduled_activation_to_entity(item) for item in circuit.schedule],
+                         schedule=[map_scheduled_activation_to_entity(item) for item in circuit.schedule],
                          active=circuit.active)
 
 

@@ -33,7 +33,7 @@ class ScheduledActivationEntity(Base):
     active = Column(Boolean)
 
     circuit_id = Column(Integer, ForeignKey('circuits.id'))
-    schedule = relationship('CircuitEntity', back_populates="schedule")
+    circuit = relationship('CircuitEntity', back_populates="schedule")
 
     def __repr__(self) -> str:
         return "<PlanItem(id='{0}', time='{1}', water='{2}', active='{3}')>".format(
