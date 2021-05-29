@@ -2,14 +2,14 @@ import asyncio
 
 from aiohttp import ClientSession
 
-from data.db.db_common import Session
-from data.db.scheduled_activation_dao import ScheduledActivationDao
-from data.db.pump_activation_dao import PumpActivationDao
-from data.db.circuit_dao import CircuitDao
-from data.pump_activation_repository import PumpActivationRepository
 from data.circuit_repository import CircuitRepository
+from data.db.circuit_dao import CircuitDao
+from data.db.db_common import Session
+from data.db.pump_activation_dao import PumpActivationDao
+from data.db.scheduled_activation_dao import ScheduledActivationDao
+from data.pump_activation_repository import PumpActivationRepository
 from data.smart_garden.smart_garden_backend import SmartGardenBackend
-from device.pump import Pump
+from device.pump_mock import Pump
 from interactors.activate_pump import ActivatePump
 from interactors.fetch_circuit import FetchCircuit
 from interactors.run_healthcheck_loop import RunHealthCheckLoop
@@ -45,7 +45,6 @@ async def main() -> None:
         pump_activation_repository = PumpActivationRepository(pump_activation_dao)
 
         pump = Pump(
-            gpio_pin=settings.pin_number,
             ml_per_second=settings.ml_per_seconds
         )
 
@@ -70,6 +69,7 @@ async def main() -> None:
                     run_healthcheck_loop.execute(),
                     run_schedule_execution_loop.execute()
                 )
+                await run_schedule_execution_loop.execute()
             except Exception:
                 logger.error('unexpected error occurred', exc_info=True)
                 logger.info('pausing for 60 seconds')

@@ -1,21 +1,20 @@
 import asyncio
-from datetime import datetime
 from logging import Logger
 
-from data.firebase.firebase_backend import FirebaseBackend
 from data.pump_activation_repository import PumpActivationRepository
-from device.pump import Pump
+from data.smart_garden.smart_garden_backend import SmartGardenBackend
+from device.pump_mock import Pump
 from domain.model import PumpActivation
 
 
 class ActivatePump:
     DATE_TIME_FORMAT = '%Y-%m-%dT%H:%M:%S'
 
-    def __init__(self, pump: Pump, repository: PumpActivationRepository, firebase: FirebaseBackend,
+    def __init__(self, pump: Pump, repository: PumpActivationRepository, backend: SmartGardenBackend,
                  logger: Logger) -> None:
         self._pump = pump
         self._repository = repository
-        self._firebase = firebase
+        self._backend = backend
         self._logger = logger
 
     async def execute(self, timestamp: str, water: int) -> None:
@@ -28,11 +27,11 @@ class ActivatePump:
         self._pump.on_async(water)
 
         await asyncio.gather(
-            self._repository.store(PumpActivation(timestamp=timestamp, water=water)),
-            self._firebase.send_execution_log(
-                activation=PumpActivation(
-                    timestamp=datetime.now().strftime(ActivatePump.DATE_TIME_FORMAT),
-                    water=water
-                )
-            )
+            self._repository.store(PumpActivation(timestamp=timestamp, amount=water)),
+            # self._backend.send_execution_log(
+            #     activation=PumpActivation(
+            #         timestamp=datetime.now().strftime(ActivatePump.DATE_TIME_FORMAT),
+            #         amount=water
+            #     )
+            # )
         )

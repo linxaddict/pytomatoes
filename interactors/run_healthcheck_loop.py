@@ -1,11 +1,11 @@
 import asyncio
 
-from data.firebase.firebase_backend import FirebaseBackend
+from data.smart_garden.smart_garden_backend import SmartGardenBackend
 
 
-class RunHealthcheckLoop:
-    def __init__(self, firebase: FirebaseBackend, interval: int = 5) -> None:
-        self._firebase = firebase
+class RunHealthCheckLoop:
+    def __init__(self, backend: SmartGardenBackend, interval: int = 5) -> None:
+        self._backend = backend
         self._interval = interval
 
     async def execute(self) -> None:
@@ -15,5 +15,5 @@ class RunHealthcheckLoop:
         while True:
             await asyncio.gather(
                 asyncio.sleep(self._interval),
-                self._firebase.send_health_check()
+                self._backend.send_health_check()
             )
