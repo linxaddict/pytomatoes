@@ -21,3 +21,4 @@ class SmartGardenAuthData:
 @dataclass
 class SmartGardenAuthRefreshData:
     access: str
+    refresh: str

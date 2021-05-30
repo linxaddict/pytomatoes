@@ -74,12 +74,6 @@ class SmartGardenBackend:
     def _returned_http_401(response: ClientResponse) -> bool:
         return response.status == 401
 
-    # def _append_auth_token(self, url: str) -> str:
-    #     if not self._valid_token_present():
-    #         return url
-    #
-    #     return f"{url}?auth={self._id_token}"
-
     def _valid_token_present(self) -> bool:
         return self._access_token is not None
 
@@ -125,7 +119,7 @@ class SmartGardenBackend:
         response = SmartGardenAuthRefreshData(**schema.load(data=json))
 
         self._access_token = response.access
-        # self._refresh_token = response.refresh
+        self._refresh_token = response.refresh
 
         return response
 
