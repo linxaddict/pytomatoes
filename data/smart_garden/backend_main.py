@@ -9,7 +9,7 @@ from data.db.pump_activation_dao import PumpActivationDao
 from data.db.scheduled_activation_dao import ScheduledActivationDao
 from data.pump_activation_repository import PumpActivationRepository
 from data.smart_garden.smart_garden_backend import SmartGardenBackend
-from device.pump_mock import Pump
+from device.pump import Pump
 from interactors.activate_pump import ActivatePump
 from interactors.fetch_circuit import FetchCircuit
 from interactors.run_healthcheck_loop import RunHealthCheckLoop
@@ -30,9 +30,8 @@ async def main() -> None:
 
     async with ClientSession() as session:
         smart_garden_backend = SmartGardenBackend(
-            email=settings.firebase_email,
-            password=settings.firebase_password,
-            db_url=settings.database_url,
+            email=settings.email,
+            password=settings.password,
             client_session=session
         )
         session = Session()
@@ -45,6 +44,7 @@ async def main() -> None:
         pump_activation_repository = PumpActivationRepository(pump_activation_dao)
 
         pump = Pump(
+            gpio_pin=settings.pin_number,
             ml_per_second=settings.ml_per_seconds
         )
 

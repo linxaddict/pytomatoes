@@ -52,7 +52,7 @@ class SmartGardenBackend:
     for fetching the circuit, sending short execution log and sending health checks.
     """
 
-    def __init__(self, email: str, password: str, db_url: str, client_session: ClientSession):
+    def __init__(self, email: str, password: str, client_session: ClientSession):
         self._auth_url = "https://smart-garden-1.herokuapp.com/api/auth/token"
         self._auth_refresh_url = "https://smart-garden-1.herokuapp.com/api/auth/token/refresh"
         self._circuit_url = "https://smart-garden-1.herokuapp.com/api/circuits/mine"
@@ -61,7 +61,6 @@ class SmartGardenBackend:
         self._email = email
         self._password = password
 
-        self._db_url = db_url
         self._client_session = client_session
 
         self._access_token = None

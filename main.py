@@ -2,12 +2,12 @@ import asyncio
 
 from aiohttp import ClientSession
 
-from data.db.db_common import Session
-from data.db.scheduled_activation_dao import ScheduledActivationDao
-from data.db.pump_activation_dao import PumpActivationDao
-from data.db.circuit_dao import CircuitDao
-from data.pump_activation_repository import PumpActivationRepository
 from data.circuit_repository import CircuitRepository
+from data.db.circuit_dao import CircuitDao
+from data.db.db_common import Session
+from data.db.pump_activation_dao import PumpActivationDao
+from data.db.scheduled_activation_dao import ScheduledActivationDao
+from data.pump_activation_repository import PumpActivationRepository
 from data.smart_garden.smart_garden_backend import SmartGardenBackend
 from device.pump import Pump
 from interactors.activate_pump import ActivatePump
@@ -30,9 +30,8 @@ async def main() -> None:
 
     async with ClientSession() as session:
         smart_garden_backend = SmartGardenBackend(
-            email=settings.firebase_email,
-            password=settings.firebase_password,
-            db_url=settings.database_url,
+            email=settings.email,
+            password=settings.password,
             client_session=session
         )
         session = Session()
