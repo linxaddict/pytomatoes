@@ -4,7 +4,7 @@ from logging import Logger
 
 from data.pump_activation_repository import PumpActivationRepository
 from data.smart_garden.smart_garden_backend import SmartGardenBackend
-from device.pump import Pump
+from device.pump_mock import Pump
 from domain.model import PumpActivation
 
 

@@ -1,5 +1,6 @@
 from data.model.model import OneTimeActivationData, ScheduledActivationData, CircuitData
-from domain.model import ScheduledActivation, Circuit, OneTimeActivation
+from data.smart_garden.model import PumpActivationData
+from domain.model import ScheduledActivation, Circuit, OneTimeActivation, PumpActivation
 
 
 def map_scheduled_activation_to_domain(activation: ScheduledActivationData) -> ScheduledActivation:
@@ -51,4 +52,18 @@ def map_domain_to_circuit(circuit: Circuit) -> CircuitData:
         one_time_activation=map_domain_to_one_time_activation(
             circuit.one_time_activation) if circuit.one_time_activation else None,
         schedule=[map_domain_to_scheduled_activation(p) for p in circuit.schedule]
+    )
+
+
+def map_pump_activation_to_domain(pump_activation: PumpActivationData) -> PumpActivation:
+    return PumpActivation(
+        timestamp=pump_activation.timestamp,
+        amount=pump_activation.amount
+    )
+
+
+def map_domain_to_pump_activation(pump_activation: PumpActivation) -> PumpActivationData:
+    return PumpActivationData(
+        timestamp=pump_activation.timestamp,
+        amount=pump_activation.amount
     )

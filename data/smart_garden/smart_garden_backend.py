@@ -4,6 +4,7 @@ from aiohttp import ClientSession, ClientResponse
 from aiohttp.client_exceptions import ClientResponseError, ClientConnectionError, ClientPayloadError, \
     InvalidURL
 
+from data.model.mapper import map_domain_to_pump_activation
 from data.model.model import CircuitData, OneTimeActivationData, ScheduledActivationData
 from data.model.schema import CircuitSchema
 from data.smart_garden.exceptions import SmartGardenResponseError, SmartGardenConnectionError, SmartGardenPayloadError, \
@@ -11,7 +12,8 @@ from data.smart_garden.exceptions import SmartGardenResponseError, SmartGardenCo
 from data.smart_garden.model import SmartGardenAuthData, SmartGardenAuthPayload, SmartGardenAuthRefreshData, \
     SmartGardenAuthRefreshPayload
 from data.smart_garden.schema import SmartGardenAuthPayloadSchema, SmartGardenAuthSchema, \
-    SmartGardenAuthRefreshPayloadSchema, SmartGardenAuthRefreshSchema
+    SmartGardenAuthRefreshPayloadSchema, SmartGardenAuthRefreshSchema, PumpActivationSchema
+from domain.model import PumpActivation
 
 
 def map_errors(f):
@@ -56,6 +58,7 @@ class SmartGardenBackend:
         self._auth_url = "https://smart-garden-1.herokuapp.com/api/auth/token"
         self._auth_refresh_url = "https://smart-garden-1.herokuapp.com/api/auth/token/refresh"
         self._circuit_url = "https://smart-garden-1.herokuapp.com/api/circuits/mine"
+        self._activation_log_url = "https://smart-garden-1.herokuapp.com/api/circuits/mine/activation-log"
         self._health_check_url = "https://smart-garden-1.herokuapp.com/api/circuits/mine/health-check"
 
         self._email = email
@@ -172,6 +175,34 @@ class SmartGardenBackend:
             one_time_activation=one_time_activation,
             schedule=schedule,
         )
+
+    @authenticate
+    async def send_execution_log(self, activation: PumpActivation) -> bool:
+        """
+        Updates data about last pump activation. This may be helpful for checking if the pump was actually activated
+        when it should be according to the schedule.
+        :param activation: activation details with timestamp and water amount
+        """
+        if not self._access_token:
+            await self._authenticate()
+
+        execution_log = map_domain_to_pump_activation(activation)
+        schema = PumpActivationSchema()
+        data = schema.dumps(execution_log)
+
+        headers = {
+            'Authorization': f"Bearer {self._access_token}",
+            'Content-Type': 'application/json'
+        }
+        raw_response = await self._post(url=self._activation_log_url, data=data, headers=headers)
+
+        if not self._returned_http_200(response=raw_response):
+            if self._returned_http_401(response=raw_response):
+                raise SmartGardenUnauthorizedError(response=raw_response)
+            else:
+                raise SmartGardenResponseError(response=raw_response)
+
+        return True
 
     @authenticate
     async def send_health_check(self) -> bool:

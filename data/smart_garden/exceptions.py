@@ -11,6 +11,9 @@ class SmartGardenException(Exception):
         self.internal_error = internal_error
         self.response = response
 
+    def __str__(self) -> str:
+        return str(self.response)
+
 
 class SmartGardenResponseError(SmartGardenException):
     pass

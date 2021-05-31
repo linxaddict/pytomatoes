@@ -22,3 +22,9 @@ class SmartGardenAuthData:
 class SmartGardenAuthRefreshData:
     access: str
     refresh: str
+
+
+@dataclass
+class PumpActivationData:
+    timestamp: str
+    amount: int

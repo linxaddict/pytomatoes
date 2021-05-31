@@ -103,6 +103,6 @@ class RunScheduleExecutionLoop:
                         if await self._should_start_pump(item, RunScheduleExecutionLoop.EXECUTION_MARGIN):
                             await self._activate_pump.execute(timestamp=self._extract_slot_ts(item), water=item.amount)
                 except Exception as e:
-                    self._logger.error('an exception occurred: {0}'.format(e))
+                    self._logger.error('an exception occurred: {0}'.format(str(e)))
 
             await asyncio.sleep(RunScheduleExecutionLoop.FETCH_INTERVAL)

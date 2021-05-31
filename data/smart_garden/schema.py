@@ -17,3 +17,9 @@ class SmartGardenAuthSchema(Schema):
 
 class SmartGardenAuthRefreshSchema(Schema):
     access = fields.Str()
+    refresh = fields.Str()
+
+
+class PumpActivationSchema(Schema):
+    timestamp = fields.Str()
+    amount = fields.Int(missing=0)
