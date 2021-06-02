@@ -9,7 +9,7 @@ from domain.model import PumpActivation
 class PumpActivationRepository:
     """
     Repository of pump activations that uses only local database. This data represents local activation history and
-    currently is not synchronized with Firebase.
+    currently is not synchronized with the backend.
     """
 
     def __init__(self, pump_activation_dao: PumpActivationDao):

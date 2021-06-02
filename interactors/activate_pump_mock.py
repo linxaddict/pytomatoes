@@ -20,7 +20,7 @@ class ActivatePump:
 
     async def execute(self, timestamp: str, water: int) -> None:
         """
-        Activates the pump and logs it in the Firebase backend.
+        Activates the pump and logs it in the backend.
         :param timestamp: timestamp of pump activation
         :param water: amount of water
         """

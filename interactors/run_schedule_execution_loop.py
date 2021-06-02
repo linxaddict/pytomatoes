@@ -25,7 +25,7 @@ class RunScheduleExecutionLoop:
     EXECUTION_MARGIN = 60
 
     """
-    Specifies how often the schedule should po fetched from Firebase.
+    Specifies how often the schedule should po fetched from the backend.
     """
     FETCH_INTERVAL = 5
 
