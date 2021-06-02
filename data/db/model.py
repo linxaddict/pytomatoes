@@ -4,35 +4,36 @@ from sqlalchemy.orm import relationship
 from data.db.db_common import Base
 
 
-class ScheduleEntity(Base):
+class CircuitEntity(Base):
     """
-    Represents schedules in the database. It has a 1 - n relation with PlanItemEntity.
+    Represents circuits in the database. It has a 1 - n relation with ScheduledActivationEntity.
     """
 
-    __tablename__ = 'schedules'
+    __tablename__ = 'circuits'
 
     id = Column(Integer, primary_key=True)
+    name = Column(String)
     active = Column(Boolean)
-    plan_items = relationship('PlanItemEntity', back_populates='schedule')
+    schedule = relationship('ScheduledActivationEntity', back_populates='circuit')
 
     def __repr__(self) -> str:
-        return "<Schedule(id='{0}')>".format(self.id)
+        return "<Circuit(id='{0}')>".format(self.id)
 
 
-class PlanItemEntity(Base):
+class ScheduledActivationEntity(Base):
     """
-    Represents schedule plan items in the database. Every item can be related to one schedule.
+    Represents scheduled activation in the database.
     """
 
-    __tablename__ = 'plan_items'
+    __tablename__ = 'scheduled_activations'
 
     id = Column(Integer, primary_key=True)
     time = Column(String)
-    water = Column(Integer)
+    amount = Column(Integer)
     active = Column(Boolean)
 
-    schedule_id = Column(Integer, ForeignKey('schedules.id'))
-    schedule = relationship('ScheduleEntity', back_populates="plan_items")
+    circuit_id = Column(Integer, ForeignKey('circuits.id'))
+    circuit = relationship('CircuitEntity', back_populates="schedule")
 
     def __repr__(self) -> str:
         return "<PlanItem(id='{0}', time='{1}', water='{2}', active='{3}')>".format(
@@ -49,8 +50,8 @@ class PumpActivationEntity(Base):
 
     id = Column(Integer, primary_key=True)
     timestamp = Column(String)
-    water = Column(Integer)
+    amount = Column(Integer)
 
     def __repr__(self) -> str:
-        return "<PumpActivationEntity(id='{0}', timestamp='{1}', water='{2}')>".format(self.id, self.timestamp,
-                                                                                       self.water)
+        return "<PumpActivationEntity(id='{0}', timestamp='{1}', amount='{2}')>".format(self.id, self.timestamp,
+                                                                                        self.amount)

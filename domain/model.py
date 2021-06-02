@@ -3,26 +3,28 @@ from typing import List, Optional
 
 
 @dataclass
-class PlanItem:
+class ScheduledActivation:
     time: str
-    water: int
+    amount: int
     active: bool
 
 
 @dataclass
 class OneTimeActivation:
-    date: str
-    water: int
+    timestamp: str
+    amount: int
 
 
 @dataclass
-class Schedule:
-    plan: List[PlanItem]
+class Circuit:
+    id: int
+    name: str
     active: bool
     one_time_activation: Optional[OneTimeActivation]
+    schedule: List[ScheduledActivation]
 
 
 @dataclass
 class PumpActivation:
     timestamp: str
-    water: int
+    amount: int

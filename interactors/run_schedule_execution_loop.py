@@ -3,9 +3,9 @@ from datetime import datetime, date
 from logging import Logger
 
 from data.pump_activation_repository import PumpActivationRepository
-from domain.model import PlanItem, OneTimeActivation
+from domain.model import ScheduledActivation, OneTimeActivation
 from interactors.activate_pump import ActivatePump
-from interactors.fetch_schedule import FetchSchedule
+from interactors.fetch_circuit import FetchCircuit
 
 
 class RunScheduleExecutionLoop:
@@ -17,7 +17,7 @@ class RunScheduleExecutionLoop:
     """
     Time format for used for describing time slots in the schedule.
     """
-    TIME_FORMAT = '%H:%M'
+    TIME_FORMAT = '%H:%M:%S'
 
     """
     Execution margin specified in minutes for determining if given plan item is still valid. 
@@ -25,19 +25,19 @@ class RunScheduleExecutionLoop:
     EXECUTION_MARGIN = 60
 
     """
-    Specifies how often the schedule should po fetched from Firebase.
+    Specifies how often the schedule should po fetched from the backend.
     """
     FETCH_INTERVAL = 5
 
-    def __init__(self, fetch_schedule: FetchSchedule, activate_pump: ActivatePump, repository: PumpActivationRepository,
+    def __init__(self, fetch_circuit: FetchCircuit, activate_pump: ActivatePump, repository: PumpActivationRepository,
                  logger: Logger) -> None:
-        self._fetch_schedule = fetch_schedule
+        self._fetch_circuit = fetch_circuit
         self._activate_pump = activate_pump
         self._repository = repository
         self._logger = logger
 
     @staticmethod
-    def _extract_slot_ts(item: PlanItem) -> str:
+    def _extract_slot_ts(item: ScheduledActivation) -> str:
         """
         Extracts the timestamp of given plan item in DATE_TIME_FORMAT.
         :param item: plan item
@@ -48,7 +48,7 @@ class RunScheduleExecutionLoop:
 
         return slot.strftime(RunScheduleExecutionLoop.DATE_TIME_FORMAT)
 
-    async def _should_start_pump(self, item: PlanItem, margin_in_minutes=60) -> bool:
+    async def _should_start_pump(self, item: ScheduledActivation, margin_in_minutes=60) -> bool:
         """
         Checks if the water pump should be activated for given plan item taking into account time margin. The margin
         specifies the limit beyond which plan items are recognized as invalid and are not executed.
@@ -74,7 +74,7 @@ class RunScheduleExecutionLoop:
         :param margin_in_minutes: the margin for determining if given plan item is still valid
         :return:true if the activate item should be executed
         """
-        one_time_date = datetime.strptime(item.date, RunScheduleExecutionLoop.DATE_TIME_FORMAT)
+        one_time_date = datetime.strptime(item.timestamp, RunScheduleExecutionLoop.DATE_TIME_FORMAT)
         now = datetime.now()
 
         slot_str = one_time_date.strftime(RunScheduleExecutionLoop.DATE_TIME_FORMAT)
@@ -90,19 +90,19 @@ class RunScheduleExecutionLoop:
         the user.
         """
         while True:
-            schedule = await self._fetch_schedule.execute()
+            schedule = await self._fetch_circuit.execute()
 
             if schedule and schedule.active:
                 try:
                     if schedule.one_time_activation and await self._should_start_one_time_activation(
                             schedule.one_time_activation, RunScheduleExecutionLoop.EXECUTION_MARGIN):
-                        await self._activate_pump.execute(timestamp=schedule.one_time_activation.date,
-                                                          water=schedule.one_time_activation.water)
+                        await self._activate_pump.execute(timestamp=schedule.one_time_activation.timestamp,
+                                                          water=schedule.one_time_activation.amount)
 
-                    for item in [pi for pi in schedule.plan if pi.active]:
+                    for item in [pi for pi in schedule.schedule if pi.active]:
                         if await self._should_start_pump(item, RunScheduleExecutionLoop.EXECUTION_MARGIN):
-                            await self._activate_pump.execute(timestamp=self._extract_slot_ts(item), water=item.water)
+                            await self._activate_pump.execute(timestamp=self._extract_slot_ts(item), water=item.amount)
                 except Exception as e:
-                    self._logger.error('an exception occurred: {0}'.format(e))
+                    self._logger.error('an exception occurred: {0}'.format(str(e)))
 
             await asyncio.sleep(RunScheduleExecutionLoop.FETCH_INTERVAL)

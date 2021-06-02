@@ -1,19 +1,23 @@
-CREATE TABLE schedules (
-	id INTEGER NOT NULL, active boolean not null default 1, 
+CREATE TABLE circuits (
+	id INTEGER NOT NULL,
+	name VARCHAR,
+	active boolean not null default 1,
 	PRIMARY KEY (id)
 );
-CREATE TABLE plan_items (
+
+CREATE TABLE scheduled_activations (
 	id INTEGER NOT NULL, 
 	time VARCHAR, 
-	water INTEGER,
+	amount INTEGER,
 	active INTEGER,
-	schedule_id INTEGER, 
+	circuit_id INTEGER,
 	PRIMARY KEY (id), 
-	FOREIGN KEY(schedule_id) REFERENCES schedules (id)
+	FOREIGN KEY(circuit_id) REFERENCES circuits (id)
 );
+
 CREATE TABLE pump_activations (
 	id INTEGER NOT NULL,
 	timestamp VARCHAR,
-	water INTEGER,
+	amount INTEGER,
 	PRIMARY KEY (id)
 );

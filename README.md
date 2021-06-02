@@ -5,30 +5,23 @@ PyTomatoes is a python application designed for taking care of plants watering (
 # Features
 
 * DC water pump control
-* fetching the schedule from Firebase real time database
+* fetching the schedule from the backend
 * working in the offline-first mode
 
 # Requirements
 
-You need to have a Firebase account, create a project and set (or put in a file named .env) these environment variables:
-
-* API_KEY
-* AUTH_DOMAIN
-* DATABASE_URL
-* STORAGE_BUCKET
-* EMAIL
-* PASSWORD
-* NODE (see pytomatoes-firebase-example.json)
-
 Add these variables to configure hardware details:
 
+* EMAIL - account email address
+* PASSWORD - account password
+* DB_NAME - local database name
 * PIN - pin responsible for activating the pump through a transistor
 * ML_PER_SECOND - determines how much water goes through the pump in a second, this should be measured manually
 
 # Running
 
 1. Create .env file with required environment variables
-2. Create a schedule in the firebase real time database according to pytomatoes-firebase-example.json
+2. Create a schedule in the backend using admin panel
 3. Execute in a shell:
 
 ```sh

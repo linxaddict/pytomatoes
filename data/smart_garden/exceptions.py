@@ -3,7 +3,7 @@ from typing import Optional
 from aiohttp import ClientResponse
 
 
-class FirebaseException(Exception):
+class SmartGardenException(Exception):
     def __init__(self, internal_error: Optional[Exception] = None, response: Optional[ClientResponse] = None,
                  *args: object) -> None:
         super().__init__(*args)
@@ -11,22 +11,25 @@ class FirebaseException(Exception):
         self.internal_error = internal_error
         self.response = response
 
+    def __str__(self) -> str:
+        return str(self.response)
 
-class FirebaseResponseError(FirebaseException):
+
+class SmartGardenResponseError(SmartGardenException):
     pass
 
 
-class FirebaseUnauthorizedError(FirebaseResponseError):
+class SmartGardenUnauthorizedError(SmartGardenException):
     pass
 
 
-class FirebaseConnectionError(FirebaseException):
+class SmartGardenConnectionError(SmartGardenException):
     pass
 
 
-class FirebasePayloadError(FirebaseException):
+class SmartGardenPayloadError(SmartGardenException):
     pass
 
 
-class FirebaseInvalidUrl(FirebaseException):
+class SmartGardenInvalidUrl(SmartGardenException):
     pass

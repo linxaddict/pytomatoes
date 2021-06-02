@@ -9,8 +9,8 @@ from data.db.pump_activation_dao import PumpActivationDao
 from data.db.scheduled_activation_dao import ScheduledActivationDao
 from data.pump_activation_repository import PumpActivationRepository
 from data.smart_garden.smart_garden_backend import SmartGardenBackend
-from device.pump import Pump
-from interactors.activate_pump import ActivatePump
+from device.pump_mock import Pump
+from interactors.activate_pump_mock import ActivatePump
 from interactors.fetch_circuit import FetchCircuit
 from interactors.run_healthcheck_loop import RunHealthCheckLoop
 from interactors.run_schedule_execution_loop import RunScheduleExecutionLoop
@@ -44,7 +44,6 @@ async def main() -> None:
         pump_activation_repository = PumpActivationRepository(pump_activation_dao)
 
         pump = Pump(
-            gpio_pin=settings.pin_number,
             ml_per_second=settings.ml_per_seconds
         )
 

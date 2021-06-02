@@ -1,23 +1,25 @@
-from data.db.model import ScheduleEntity, PlanItemEntity, PumpActivationEntity
-from domain.model import Schedule, PlanItem, PumpActivation
+from data.db.model import PumpActivationEntity, ScheduledActivationEntity, CircuitEntity
+from domain.model import Circuit, ScheduledActivation, PumpActivation
 
 
-def map_plan_item_to_entity(plan_item: PlanItem) -> PlanItemEntity:
+def map_scheduled_activation_to_entity(activation: ScheduledActivation) -> ScheduledActivationEntity:
     """
     Maps domain model of plan item to its entity representation.
-    :param plan_item: domain model
+    :param activation: domain model
     :return: database model
     """
-    return PlanItemEntity(time=plan_item.time, water=plan_item.water, active=plan_item.active)
+    return ScheduledActivationEntity(time=activation.time, amount=activation.amount, active=activation.active)
 
 
-def map_schedule_to_entity(schedule: Schedule) -> ScheduleEntity:
+def map_circuit_to_entity(circuit: Circuit) -> CircuitEntity:
     """
     Maps domain model of schedule to its entity representation.
-    :param schedule: domain model
+    :param circuit: domain model
     :return: database model
     """
-    return ScheduleEntity(plan_items=[map_plan_item_to_entity(item) for item in schedule.plan], active=schedule.active)
+    return CircuitEntity(name=circuit.name,
+                         schedule=[map_scheduled_activation_to_entity(item) for item in circuit.schedule],
+                         active=circuit.active)
 
 
 def map_pump_activation_to_entity(pump_activation: PumpActivation) -> PumpActivationEntity:
@@ -26,25 +28,27 @@ def map_pump_activation_to_entity(pump_activation: PumpActivation) -> PumpActiva
     :param pump_activation: domain model
     :return: database model
     """
-    return PumpActivationEntity(timestamp=pump_activation.timestamp, water=pump_activation.water)
+    return PumpActivationEntity(timestamp=pump_activation.timestamp, amount=pump_activation.amount)
 
 
-def map_plan_item_entity_to_domain(plan_item: PlanItemEntity) -> PlanItem:
+def map_plan_item_entity_to_domain(activation: ScheduledActivationEntity) -> ScheduledActivation:
     """
-    Maps entity representation of plan item to a domain model.
-    :param plan_item: database model
+    Maps entity representation of scheduled activation to a domain model.
+    :param activation: database model
     :return: domain model
     """
-    return PlanItem(time=plan_item.time, water=plan_item.water, active=plan_item.active)
+    return ScheduledActivation(time=activation.time, amount=activation.amount, active=activation.active)
 
 
-def map_schedule_entity_to_domain(schedule: ScheduleEntity) -> Schedule:
+def map_circuit_entity_to_domain(circuit: CircuitEntity) -> Circuit:
     """
-    Maps entity representation of schedule to a domain model.
-    :param schedule: database model
+    Maps entity representation of circuit to a domain model.
+    :param circuit: database model
     :return: domain model
     """
-    return Schedule(plan=[map_plan_item_entity_to_domain(item) for item in schedule.plan_items], active=schedule.active)
+    return Circuit(id=circuit.id, name=circuit.name,
+                   schedule=[map_scheduled_activation_to_entity(item) for item in circuit.schedule],
+                   active=circuit.active, one_time_activation=None)
 
 
 def map_pump_activation_entity_to_domain(pump_activation: PumpActivationEntity) -> PumpActivation:
@@ -53,4 +57,4 @@ def map_pump_activation_entity_to_domain(pump_activation: PumpActivationEntity) 
     :param pump_activation: database model
     :return: domain model
     """
-    return PumpActivation(timestamp=pump_activation.timestamp, water=pump_activation.water)
+    return PumpActivation(timestamp=pump_activation.timestamp, amount=pump_activation.amount)
